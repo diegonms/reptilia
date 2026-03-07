@@ -604,7 +604,6 @@
         const catalogGrid = document.getElementById('catalog-grid');
         const successAlert = document.getElementById('success-alert');
         const fileInput = document.getElementById('animal-img-file');
-        const urlInput = document.getElementById('animal-img');
         const previewContainer = document.getElementById('image-preview');
         const previewImg = document.getElementById('preview-img');
 
@@ -661,7 +660,6 @@
             const defaultImage = 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
 
             const file = fileInput.files[0];
-            const url = urlInput.value.trim();
 
             const commitCard = (imgSrc) => {
                 createCard(imgSrc, name, species, category, price, desc);
@@ -682,8 +680,6 @@
                 const reader = new FileReader();
                 reader.onload = () => commitCard(reader.result);
                 reader.readAsDataURL(file);
-            } else if (url) {
-                commitCard(url);
             } else {
                 commitCard(defaultImage);
             }
