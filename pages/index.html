@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exotiq | Animais Exóticos Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans:['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            light: '#d1fae5', // emerald-100
+                            DEFAULT: '#16a34a', // emerald-600
+                            dark: '#064e3b', // emerald-900
+                            blue: '#22c55e', // emerald-500
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Glassmorphism utility classes */
+        .glass {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(22, 163, 74, 0.12);
+        }
+        .glass-dark {
+            background: rgba(49, 46, 129, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Blob animations for background */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob { animation: blob 7s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+        
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 relative overflow-x-hidden font-sans selection:bg-brand-DEFAULT selection:text-white">
+
+    <!-- Background Blobs (for Glassmorphism contrast) -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-96 h-96 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- Navegação -->
+    <nav class="fixed w-full z-50 glass transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <i class="fa-solid fa-leaf text-brand-DEFAULT text-2xl mr-2"></i>
+                    <span class="font-heading font-bold text-2xl text-brand-dark tracking-tight">Exotiq</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#sobre" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Sobre</a>
+                    <a href="#catalogo" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Catálogo</a>
+                    <a href="#diferenciais" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Diferenciais</a>
+                    <a href="#precos" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Preços</a>
+                    <a href="#inventario" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Inventário</a>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-slate-600 hover:text-brand-DEFAULT focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass border-t border-white/40">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#sobre" class="block px-3 py-2 text-slate-600 font-medium">Sobre</a>
+                <a href="#catalogo" class="block px-3 py-2 text-slate-600 font-medium">Catálogo</a>
+                <a href="#precos" class="block px-3 py-2 text-slate-600 font-medium">Preços</a>
+                <a href="#inventario" class="block px-3 py-2 text-slate-600 font-medium">Inventário</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <h1 class="font-heading text-5xl md:text-7xl font-bold text-brand-dark mb-6 leading-tight">
+                A Natureza Exótica <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-DEFAULT to-brand-blue">Na Sua Casa</span>
+            </h1>
+            <p class="mt-4 text-xl text-slate-600 max-w-2xl mx-auto mb-10">
+                Especialistas em cobras, tartarugas e araras. Animais criados com excelência, ética e documentação rigorosa para quem busca companheiros únicos.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+                <a href="#catalogo" class="px-8 py-4 bg-emerald-700 text-white rounded-full font-medium hover:bg-emerald-600 transition-all duration-300 shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-1">Ver Catálogo</a>
+                <a href="#sobre" class="px-8 py-4 glass text-brand-dark rounded-full font-medium hover:bg-white transition-all duration-300">Conheça a Exotiq</a>
+            </div>
+
+            <!-- Business Metrics (Glassmorphism Cards) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
+                <div class="glass p-6 rounded-2xl transition-transform hover:scale-105 duration-300">
+                    <i class="fa-solid fa-users text-3xl text-brand-blue mb-3"></i>
+                    <h3 class="font-heading font-bold text-3xl text-brand-dark">500+</h3>
+                    <p class="text-slate-600 font-medium text-sm uppercase tracking-wider">Clientes Felizes</p>
+                </div>
+                <div class="glass p-6 rounded-2xl transition-transform hover:scale-105 duration-300">
+                    <i class="fa-solid fa-file-medical text-3xl text-brand-blue mb-3"></i>
+                    <h3 class="font-heading font-bold text-3xl text-brand-dark">100%</h3>
+                    <p class="text-slate-600 font-medium text-sm uppercase tracking-wider">Certificado de Saúde</p>
+                </div>
+                <div class="glass p-6 rounded-2xl transition-transform hover:scale-105 duration-300">
+                    <i class="fa-solid fa-headset text-3xl text-brand-blue mb-3"></i>
+                    <h3 class="font-heading font-bold text-3xl text-brand-dark">24/7</h3>
+                    <p class="text-slate-600 font-medium text-sm uppercase tracking-wider">Suporte Especializado</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sobre o Negócio -->
+    <section id="sobre" class="py-20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2 relative group">
+                    <div class="absolute -inset-2 bg-gradient-to-r from-brand-DEFAULT to-brand-blue rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                    <img src="/images/Arara_Caninde.jpg" alt="Arara Azul Exótica" class="relative rounded-2xl shadow-2xl object-cover h-[500px] w-full transition-transform duration-500 group-hover:scale-[1.02]">
+                </div>
+                <div class="lg:w-1/2">
+                    <h4 class="text-brand-blue font-semibold tracking-wider uppercase mb-2">Sobre Nós</h4>
+                    <h2 class="font-heading text-4xl font-bold text-brand-dark mb-6">Paixão pelo exótico, respeito pela vida.</h2>
+                    <p class="text-slate-600 mb-6 text-lg leading-relaxed">
+                        A Exotiq nasceu da paixão profunda por animais singulares. Com mais de uma década de experiência, nos tornamos referência na criação e comercialização ética de répteis e aves exóticas no Brasil.
+                    </p>
+                    <p class="text-slate-600 mb-8 text-lg leading-relaxed">
+                        Nosso compromisso vai além da venda. Garantimos que cada animal que sai de nossas instalações está em perfeitas condições de saúde e que seus novos tutores possuam todo o conhecimento e suporte necessários para proporcionar uma vida longa e feliz.
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-center text-slate-700 font-medium"><i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i> Autorização rigorosa do IBAMA</li>
+                        <li class="flex items-center text-slate-700 font-medium"><i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i> Microchipagem e rastreamento</li>
+                        <li class="flex items-center text-slate-700 font-medium"><i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i> Veterinários in-house 24h</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Diferenciais -->
+    <section id="diferenciais" class="py-20 bg-brand-light/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="font-heading text-4xl font-bold text-brand-dark mb-16">Nossos Diferenciais</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Diff 1 -->
+                <div class="glass p-8 rounded-2xl hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-16 h-16 mx-auto bg-brand-DEFAULT/10 rounded-full flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-heart-pulse text-2xl text-brand-DEFAULT"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-xl text-brand-dark mb-3">Certificação de Saúde</h3>
+                    <p class="text-slate-600 text-sm">Exames completos, vacinação e atestado veterinário assinado antes da entrega.</p>
+                </div>
+                <!-- Diff 2 -->
+                <div class="glass p-8 rounded-2xl hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-16 h-16 mx-auto bg-brand-DEFAULT/10 rounded-full flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-dove text-2xl text-brand-DEFAULT"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-xl text-brand-dark mb-3">Sourcing Ético</h3>
+                    <p class="text-slate-600 text-sm">Criação legalizada em cativeiro, combatendo ativamente o tráfico de animais.</p>
+                </div>
+                <!-- Diff 3 -->
+                <div class="glass p-8 rounded-2xl hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-16 h-16 mx-auto bg-brand-DEFAULT/10 rounded-full flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-truck-fast text-2xl text-brand-DEFAULT"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-xl text-brand-dark mb-3">Transporte Seguro</h3>
+                    <p class="text-slate-600 text-sm">Veículos climatizados e caixas de transporte homologadas para zero estresse.</p>
+                </div>
+                <!-- Diff 4 -->
+                <div class="glass p-8 rounded-2xl hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-16 h-16 mx-auto bg-brand-DEFAULT/10 rounded-full flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-book-open text-2xl text-brand-DEFAULT"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-xl text-brand-dark mb-3">Guia de Cuidados</h3>
+                    <p class="text-slate-600 text-sm">Manual vitalício exclusivo sobre nutrição, ambientação e bem-estar do pet.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catálogo de Animais -->
+    <section id="catalogo" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h4 class="text-brand-blue font-semibold tracking-wider uppercase mb-2">Disponíveis</h4>
+                <h2 class="font-heading text-4xl font-bold text-brand-dark">Catálogo Exclusivo</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="catalog-grid">
+                <!-- Card Cobra -->
+                <div class="glass rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col">
+                    <div class="relative h-64 overflow-hidden">
+                        <div class="absolute inset-0 bg-brand-dark/20 group-hover:bg-transparent transition-all z-10"></div>
+                        <img src="https://images.unsplash.com/photo-1531386151447-fd76ad50012f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cobra Python" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        <span class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">Répteis</span>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-heading text-2xl font-bold text-brand-dark">Python Regius</h3>
+                                <p class="text-slate-500 text-sm italic">Píton-real (Morph Pastel)</p>
+                            </div>
+                            <span class="font-bold text-brand-DEFAULT text-xl">R$ 1.800</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-6 flex-grow">Cobras extremamente dóceis, ideais para iniciantes. Cores vibrantes e excelente estado de saúde. Alimentando-se perfeitamente.</p>
+                        <button class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
+                    </div>
+                </div>
+
+                <!-- Card Tartaruga -->
+                <div class="glass rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col">
+                    <div class="relative h-64 overflow-hidden">
+                        <div class="absolute inset-0 bg-brand-dark/20 group-hover:bg-transparent transition-all z-10"></div>
+                        <img src="https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Tartaruga" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        <span class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">Quelônios</span>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-heading text-2xl font-bold text-brand-dark">Jabuti-Piranga</h3>
+                                <p class="text-slate-500 text-sm italic">Chelonoidis carbonarius</p>
+                            </div>
+                            <span class="font-bold text-brand-DEFAULT text-xl">R$ 950</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-6 flex-grow">Filhotes nascidos em cativeiro com carapaças perfeitas. Extremamente interativos e adaptáveis ao clima tropical brasileiro.</p>
+                        <button class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
+                    </div>
+                </div>
+
+                <!-- Card Arara -->
+                <div class="glass rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col">
+                    <div class="relative h-64 overflow-hidden">
+                        <div class="absolute inset-0 bg-brand-dark/20 group-hover:bg-transparent transition-all z-10"></div>
+                        <img src="https://images.unsplash.com/photo-1549429445-5fccbfdf3951?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Arara Canindé" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        <span class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">Aves</span>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-heading text-2xl font-bold text-brand-dark">Arara Canindé</h3>
+                                <p class="text-slate-500 text-sm italic">Ara ararauna</p>
+                            </div>
+                            <span class="font-bold text-brand-DEFAULT text-xl">R$ 18.500</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-6 flex-grow">Aves mansas criadas na mão (hand-fed). Plumagem impecável, anilhadas e sexadas por DNA. Companheiras para a vida toda.</p>
+                        <button class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preços -->
+    <section id="precos" class="py-20 relative bg-slate-50 text-slate-900">
+        <!-- SVG background overlay -->
+        <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'\#ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="font-heading text-4xl font-bold mb-4">Planos de Adoção</h2>
+                <p class="text-slate-600 max-w-2xl mx-auto">Escolha o nível de suporte e acessórios que você deseja levar junto com seu novo companheiro.</p>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-8 justify-center items-center">
+                <!-- Tier 1 -->
+                <div class="glass w-full lg:w-1/3 p-8 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 class="font-heading text-2xl font-bold mb-2">Essencial</h3>
+                    <p class="text-slate-700 text-sm mb-6">Apenas o animal e documentos</p>
+                    <div class="mb-8">
+                        <span class="text-4xl font-bold">Valor Base</span>
+                    </div>
+                    <ul class="space-y-4 mb-8 text-slate-700">
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-500 mr-3"></i> O animal escolhido</li>
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-500 mr-3"></i> Documentação e NF</li>
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-500 mr-3"></i> Atestado de saúde</li>
+                        <li class="flex items-center text-sm opacity-50"><i class="fa-solid fa-xmark text-red-400 mr-3"></i> Kit Inicial de Habitat</li>
+                        <li class="flex items-center text-sm opacity-50"><i class="fa-solid fa-xmark text-red-400 mr-3"></i> Suporte Veterinário Local</li>
+                    </ul>
+                    <button class="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors">Selecionar Essencial</button>
+                </div>
+
+                <!-- Tier 2 (Highlighted) -->
+                <div class="relative w-full lg:w-1/3 p-10 rounded-3xl transform lg:scale-110 shadow-2xl border border-slate-300 bg-slate-200">
+                    <div class="absolute top-0 right-0 z-20 bg-emerald-700 text-white text-xs font-bold px-4 py-1 rounded-bl-xl rounded-tr-3xl uppercase tracking-wider">Mais Popular</div>
+                    <h3 class="font-heading text-2xl font-bold mb-2 text-slate-900">Premium</h3>
+                    <p class="text-slate-700 text-sm mb-6">Tudo que você precisa para começar</p>
+                    <div class="mb-8">
+                        <span class="text-4xl font-bold text-slate-900">+ R$ 850</span><span class="text-slate-700 text-sm"> /único</span>
+                    </div>
+                    <ul class="space-y-4 mb-8 text-slate-700">
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-600 mr-3"></i> O animal escolhido + Docs</li>
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-600 mr-3"></i> Terrário/Gaiola Intermediária</li>
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-600 mr-3"></i> Alimentação para 30 dias</li>
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-600 mr-3"></i> 1 mês de Suporte Online</li>
+                        <li class="flex items-center text-sm opacity-50"><i class="fa-solid fa-xmark text-red-400 mr-3"></i> Suporte Veterinário Presencial</li>
+                    </ul>
+                    <button class="w-full py-4 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold hover:shadow-lg hover:scale-[1.02] transition-all">Selecionar Premium</button>
+                </div>
+
+                <!-- Tier 3 -->
+                <div class="glass w-full lg:w-1/3 p-8 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 class="font-heading text-2xl font-bold mb-2">Exotiq VIP</h3>
+                    <p class="text-slate-700 text-sm mb-6">A experiência completa e sem preocupações</p>
+                    <div class="mb-8">
+                        <span class="text-4xl font-bold text-slate-900">+ R$ 3.200</span><span class="text-slate-700 text-sm"> /único</span>
+                    </div>
+                    <ul class="space-y-4 mb-8 text-slate-700">
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-500 mr-3"></i> O animal escolhido + Docs</li>
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-500 mr-3"></i> Habitat Premium (Smart)</li>
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-500 mr-3"></i> Alimentação para 3 meses</li>
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-500 mr-3"></i> 1 Ano de Suporte 24/7</li>
+                        <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-500 mr-3"></i> 2 Consultas Vet Locais Inclusas</li>
+                    </ul>
+                    <button class="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors">Selecionar VIP</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Depoimentos -->
+    <section class="py-24 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <h2 class="font-heading text-4xl font-bold text-center text-brand-dark mb-16">O Que Dizem Nossos Clientes</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Review 1 -->
+                <div class="glass p-8 rounded-2xl relative">
+                    <i class="fa-solid fa-quote-right absolute top-6 right-6 text-4xl text-brand-light opacity-50"></i>
+                    <div class="flex text-yellow-400 mb-4 text-sm">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-slate-600 mb-6 italic">"A equipe da Exotiq foi fantástica. Comprei minha primeira jiboia e o suporte deles me deu toda a confiança necessária. Animal incrivelmente saudável!"</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center text-brand-dark font-bold text-xl mr-4">R</div>
+                        <div>
+                            <h4 class="font-bold text-brand-dark">Ricardo M.</h4>
+                            <p class="text-xs text-slate-500">São Paulo, SP</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Review 2 -->
+                <div class="glass p-8 rounded-2xl relative">
+                    <i class="fa-solid fa-quote-right absolute top-6 right-6 text-4xl text-brand-light opacity-50"></i>
+                    <div class="flex text-yellow-400 mb-4 text-sm">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-slate-600 mb-6 italic">"O pacote Premium valeu cada centavo. Minha tartaruga chegou num transporte super cuidadoso e o terrário que veio junto é de altíssima qualidade."</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center text-brand-dark font-bold text-xl mr-4">C</div>
+                        <div>
+                            <h4 class="font-bold text-brand-dark">Camila T.</h4>
+                            <p class="text-xs text-slate-500">Curitiba, PR</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Review 3 -->
+                <div class="glass p-8 rounded-2xl relative">
+                    <i class="fa-solid fa-quote-right absolute top-6 right-6 text-4xl text-brand-light opacity-50"></i>
+                    <div class="flex text-yellow-400 mb-4 text-sm">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                    </div>
+                    <p class="text-slate-600 mb-6 italic">"Realizei o sonho de ter uma Arara Canindé. O processo burocrático com o IBAMA foi todo facilitado por eles. Recomendo de olhos fechados!"</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center text-brand-dark font-bold text-xl mr-4">F</div>
+                        <div>
+                            <h4 class="font-bold text-brand-dark">Fernando A.</h4>
+                            <p class="text-xs text-slate-500">Belo Horizonte, MG</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-20 bg-slate-100" id="faq">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="font-heading text-4xl font-bold text-center text-brand-dark mb-12">Perguntas Frequentes</h2>
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="glass rounded-xl overflow-hidden">
+                    <button class="faq-btn w-full text-left px-6 py-5 flex justify-between items-center focus:outline-none">
+                        <span class="font-bold text-brand-dark text-lg">É legal ter esses animais em casa?</span>
+                        <i class="fa-solid fa-chevron-down text-brand-DEFAULT transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content max-h-0 overflow-hidden transition-all duration-300 px-6">
+                        <p class="pb-5 text-slate-600">Sim. Todos os nossos animais são oriundos de criadouros comerciais legalizados e autorizados pelo IBAMA. Eles acompanham nota fiscal, microchip (ou anilha) e certificado de origem, comprovando sua legalidade.</p>
+                    </div>
+                </div>
+                <!-- FAQ Item 2 -->
+                <div class="glass rounded-xl overflow-hidden">
+                    <button class="faq-btn w-full text-left px-6 py-5 flex justify-between items-center focus:outline-none">
+                        <span class="font-bold text-brand-dark text-lg">Como funciona o envio do animal?</span>
+                        <i class="fa-solid fa-chevron-down text-brand-DEFAULT transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content max-h-0 overflow-hidden transition-all duration-300 px-6">
+                        <p class="pb-5 text-slate-600">O envio é feito por companhias aéreas específicas com despacho de carga viva, ou por transportadoras terrestres homologadas, dependendo da sua região. Garantimos que o animal chegará seguro e saudável em caixas climatizadas e aprovadas pela IATA.</p>
+                    </div>
+                </div>
+                <!-- FAQ Item 3 -->
+                <div class="glass rounded-xl overflow-hidden">
+                    <button class="faq-btn w-full text-left px-6 py-5 flex justify-between items-center focus:outline-none">
+                        <span class="font-bold text-brand-dark text-lg">Vocês oferecem garantia de saúde?</span>
+                        <i class="fa-solid fa-chevron-down text-brand-DEFAULT transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content max-h-0 overflow-hidden transition-all duration-300 px-6">
+                        <p class="pb-5 text-slate-600">Sim. Fornecemos um atestado de saúde assinado por nosso médico veterinário antes do embarque. Além disso, oferecemos uma garantia de saúde inicial de 30 dias para suporte em adaptação.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Formulário de Inventário (Adicionar Animal) -->
+    <section id="inventario" class="py-24 relative">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass p-8 md:p-12 rounded-3xl shadow-xl border-t border-white">
+                <div class="text-center mb-10">
+                    <h2 class="font-heading text-3xl font-bold text-brand-dark">Adicionar ao Inventário</h2>
+                    <p class="text-slate-500 mt-2">Área restrita para cadastro de novos espécimes</p>
+                </div>
+                <form id="inventory-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Nome Comum</label>
+                            <input type="text" id="animal-name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-DEFAULT focus:border-brand-DEFAULT outline-none transition-all bg-white/50" placeholder="Ex: Iguana Verde">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Espécie / Nome Científico</label>
+                            <input type="text" id="animal-species" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-DEFAULT focus:border-brand-DEFAULT outline-none transition-all bg-white/50" placeholder="Ex: Iguana iguana">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Categoria</label>
+                            <select id="animal-category" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-DEFAULT focus:border-brand-DEFAULT outline-none transition-all bg-white/50 appearance-none">
+                                <option value="Répteis">Cobra / Réptil</option>
+                                <option value="Quelônios">Tartaruga / Quelônio</option>
+                                <option value="Aves">Arara / Ave</option>
+                                <option value="Anfíbios">Anfíbio</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Preço (R$)</label>
+                            <input type="number" id="animal-price" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-DEFAULT focus:border-brand-DEFAULT outline-none transition-all bg-white/50" placeholder="Ex: 1500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">URL da Imagem</label>
+                        <input type="url" id="animal-img" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-DEFAULT focus:border-brand-DEFAULT outline-none transition-all bg-white/50" placeholder="https://exemplo.com/imagem.jpg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Descrição Curta</label>
+                        <textarea id="animal-desc" rows="3" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-DEFAULT focus:border-brand-DEFAULT outline-none transition-all bg-white/50 resize-none" placeholder="Detalhes sobre o animal, temperamento e alimentação..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-brand-dark text-white rounded-xl font-bold hover:bg-brand-DEFAULT transition-colors shadow-lg shadow-brand-DEFAULT/30 flex justify-center items-center">
+                        <i class="fa-solid fa-plus mr-2"></i> Cadastrar Animal
+                    </button>
+                    <!-- Alerta de Sucesso -->
+                    <div id="success-alert" class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl relative" role="alert">
+                        <span class="block sm:inline">Animal cadastrado com sucesso e adicionado ao catálogo!</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rodapé -->
+    <footer class="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center mb-4">
+                        <i class="fa-solid fa-leaf text-brand-DEFAULT text-2xl mr-2"></i>
+                        <span class="font-heading font-bold text-2xl text-white tracking-tight">Exotiq</span>
+                    </div>
+                    <p class="text-sm text-slate-400 mb-6">Sua conexão ética e segura com a natureza selvagem. Referência no Brasil em animais exóticos legalizados.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center hover:bg-brand-DEFAULT hover:text-white transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center hover:bg-brand-DEFAULT hover:text-white transition-colors"><i class="fa-brands fa-whatsapp"></i></a>
+                        <a href="#" class="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center hover:bg-brand-DEFAULT hover:text-white transition-colors"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Navegação</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#home" class="hover:text-brand-light transition-colors">Início</a></li>
+                        <li><a href="#sobre" class="hover:text-brand-light transition-colors">Sobre Nós</a></li>
+                        <li><a href="#catalogo" class="hover:text-brand-light transition-colors">Catálogo</a></li>
+                        <li><a href="#precos" class="hover:text-brand-light transition-colors">Preços</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Animais</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-brand-light transition-colors">Cobras e Serpentes</a></li>
+                        <li><a href="#" class="hover:text-brand-light transition-colors">Tartarugas e Quelônios</a></li>
+                        <li><a href="#" class="hover:text-brand-light transition-colors">Araras e Psitacídeos</a></li>
+                        <li><a href="#" class="hover:text-brand-light transition-colors">Acessórios e Terrários</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Contato</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start"><i class="fa-solid fa-location-dot mt-1 mr-2 text-brand-DEFAULT"></i> Av. das Américas, 1000 - Rio de Janeiro, RJ</li>
+                        <li class="flex items-center"><i class="fa-solid fa-phone mr-2 text-brand-DEFAULT"></i> (21) 99999-0000</li>
+                        <li class="flex items-center"><i class="fa-solid fa-envelope mr-2 text-brand-DEFAULT"></i> contato@exotiq.com.br</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
+                <p>&copy; 2026 Exotiq. Todos os direitos reservados.</p>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-white">Política de Privacidade</a>
+                    <a href="#" class="hover:text-white">Termos de Serviço</a>
+                    <a href="#" class="hover:text-white">Licenças IBAMA</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-md');
+                nav.style.background = 'rgba(255, 255, 255, 0.9)';
+            } else {
+                nav.classList.remove('shadow-md');
+                nav.style.background = 'rgba(255, 255, 255, 0.65)';
+            }
+        });
+
+        // Mobile menu toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // FAQ Accordion
+        const faqBtns = document.querySelectorAll('.faq-btn');
+        faqBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const content = this.nextElementSibling;
+                const icon = this.querySelector('i');
+                
+                // Fecha outros abertos (opcional)
+                document.querySelectorAll('.faq-content').forEach(el => {
+                    if(el !== content) {
+                        el.style.maxHeight = null;
+                        el.previousElementSibling.querySelector('i').classList.remove('rotate-180');
+                    }
+                });
+
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    icon.classList.remove('rotate-180');
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    icon.classList.add('rotate-180');
+                }
+            });
+        });
+
+        // Form Submit Simulation (Adiciona o card dinamicamente)
+        const form = document.getElementById('inventory-form');
+        const catalogGrid = document.getElementById('catalog-grid');
+        const successAlert = document.getElementById('success-alert');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('animal-name').value;
+            const species = document.getElementById('animal-species').value;
+            const category = document.getElementById('animal-category').value;
+            const price = parseFloat(document.getElementById('animal-price').value).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            const img = document.getElementById('animal-img').value || 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+            const desc = document.getElementById('animal-desc').value;
+
+            // Criar novo card
+            const newCard = document.createElement('div');
+            newCard.className = 'glass rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col';
+            newCard.innerHTML = `
+                <div class="relative h-64 overflow-hidden">
+                    <div class="absolute inset-0 bg-brand-dark/20 group-hover:bg-transparent transition-all z-10"></div>
+                    <img src="${img}" alt="${name}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                    <span class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">${category}</span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-heading text-2xl font-bold text-brand-dark">${name}</h3>
+                            <p class="text-slate-500 text-sm italic">${species}</p>
+                        </div>
+                        <span class="font-bold text-brand-DEFAULT text-xl">R$ ${price}</span>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-6 flex-grow">${desc}</p>
+                    <button class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
+                </div>
+            `;
+
+            // Adicionar ao grid de catálogo
+            catalogGrid.insertBefore(newCard, catalogGrid.firstChild);
+
+            // Mostrar mensagem de sucesso e resetar
+            successAlert.classList.remove('hidden');
+            form.reset();
+
+            // Rolar para o catálogo para ver o novo animal
+            setTimeout(() => {
+                successAlert.classList.add('hidden');
+                window.location.hash = '#catalogo';
+            }, 2500);
+        });
+    </script>
+</body>
+</html>
