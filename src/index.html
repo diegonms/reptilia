@@ -61,7 +61,7 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 relative overflow-x-hidden font-sans selection:bg-brand-DEFAULT selection:text-white">
+<body class="bg-slate-50 text-slate-800 relative overflow-x-hidden font-sans selection:bg-brand-DEFAULT ">
 
     <!-- Background Blobs (for Glassmorphism contrast) -->
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
@@ -156,9 +156,18 @@
                         Nosso compromisso vai além da venda. Garantimos que cada animal que sai de nossas instalações está em perfeitas condições de saúde e que seus novos tutores possuam todo o conhecimento e suporte necessários para proporcionar uma vida longa e feliz.
                     </p>
                     <ul class="space-y-4">
-                        <li class="flex items-center text-slate-700 font-medium"><i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i> Autorização rigorosa do IBAMA</li>
-                        <li class="flex items-center text-slate-700 font-medium"><i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i> Microchipagem e rastreamento</li>
-                        <li class="flex items-center text-slate-700 font-medium"><i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i> Veterinários in-house 24h</li>
+                        <li class="flex items-center text-slate-700 font-medium">
+                            <i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i>
+                            <button class="text-left w-full underline-offset-4 hover:underline focus:outline-none" data-diff="ibama">Manejo Ético e Bem-Estar</button>
+                        </li>
+                        <li class="flex items-center text-slate-700 font-medium">
+                            <i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i>
+                            <button class="text-left w-full underline-offset-4 hover:underline focus:outline-none" data-diff="microchip">Controle Genético</button>
+                        </li>
+                        <li class="flex items-center text-slate-700 font-medium">
+                            <i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i>
+                            <button class="text-left w-full underline-offset-4 hover:underline focus:outline-none" data-diff="vet">Biossegurança</button>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -278,7 +287,14 @@
         </div>
     </section>
 
-    
+    <!-- Modal Diferenciais -->
+    <div id="diff-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" aria-hidden="true">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative">
+            <button id="diff-modal-close" class="absolute top-4 right-4 text-slate-500 hover:text-slate-900" aria-label="Fechar modal">✕</button>
+            <h3 id="diff-modal-title" class="text-2xl font-heading font-bold text-brand-dark mb-3">Título</h3>
+            <p id="diff-modal-content" class="text-slate-700 leading-relaxed">Descrição detalhada do diferencial.</p>
+        </div>
+    </div>
 
     <!-- Preços -->
     <section id="precos" class="py-20 relative bg-slate-50 text-slate-900">
@@ -685,6 +701,55 @@
                 reader.readAsDataURL(file);
             } else {
                 commitCard(defaultImage);
+            }
+        });
+
+        // Diferenciais Modal (linhas do Sobre Nós)
+        const diffData = {
+            ibama: {
+                title: 'Manejo Ético e Bem-Estar',
+                text: 'A etologia é o estudo do comportamento, sendo aplicado em cada indivíduo e cada espécie. Isso significa que o recinto é um ambiente que atende às necessidades fisiológicas e psicológicas do animal. "Nem sempre o que é bom para os nossos olhos é bom para o animal, a etologia confirma isso".'
+            },
+            microchip: {
+                title: 'Controle Genético',
+                text: 'Um mapeamento cuidadoso, e projetos pensados evita anomalias e garante um plantel robusto e saudável.'
+            },
+            vet: {
+                title: 'Biossegurança',
+                text: 'O olhar treinado identifica vetores de doenças e riscos de contaminação antes que se tornem um problema, reduzindo drasticamente a mortalidade.'
+            }
+        };
+
+        const modal = document.getElementById('diff-modal');
+        const modalTitle = document.getElementById('diff-modal-title');
+        const modalContent = document.getElementById('diff-modal-content');
+        const modalClose = document.getElementById('diff-modal-close');
+
+        document.querySelectorAll('[data-diff]').forEach(button => {
+            button.addEventListener('click', () => {
+                const key = button.getAttribute('data-diff');
+                const item = diffData[key];
+                if (!item) return;
+                modalTitle.textContent = item.title;
+                modalContent.textContent = item.text;
+                modal.classList.remove('hidden');
+                modal.setAttribute('aria-hidden', 'false');
+            });
+        });
+
+        function closeDiffModal() {
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        modalClose.addEventListener('click', closeDiffModal);
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) closeDiffModal();
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeDiffModal();
             }
         });
     </script>
