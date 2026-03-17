@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1773786144697,
+    "name": "teste",
+    "species": "teste",
+    "category": "Répteis",
+    "price": 710,
+    "desc": "teste",
+    "imgSrc": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAABKCAYAAADgxem7AAAABHNCSVQICAgIfAhkiAAAABl0RVh0U29mdHdhcmUAZ25vbWUtc2NyZWVuc2hvdO8Dvz4AAAAmdEVYdENyZWF0aW9uIFRpbWUAZG9tIDA4IG1hciAyMDI2IDExOjAyOjUxDqeGrgAAAKhJREFUeJzt0DERhAAAxMDjDVDiAf/+njYOoNhVkMlxXvd/bNt+bwd8iRlhRpgRZoQZYUaYEWaEGWFGmBFmhBlhRpgRZoQZYUaYEWaEGWFGmBFmhBlhRpgRZoQZYUaYEWaEGWFGmBFmhBlhRpgRZoQZYUaYEWaEGWFGmBFmhBlhRpgRZoQZYUaYEWaEGWFGmBFmhBlhRpgRZoQZYUaYEWaEGWFGmBFmxAOLQQHjU1E38gAAAABJRU5ErkJggg=="
+  },
+  {
+    "id": 1773785785805,
+    "name": "TesteX",
+    "species": "Cobra",
+    "category": "Répteis",
+    "price": 123.45,
+    "desc": "Teste de API",
+    "imgSrc": "https://via.placeholder.com/200"
+  }
+]

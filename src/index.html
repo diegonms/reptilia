@@ -68,6 +68,7 @@
     <div id="login-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8">
             <h2 class="text-3xl font-heading font-bold text-brand-dark mb-4 text-center">Acesso Reptilia</h2>
+            <p class="text-xl text-center">Faça o seu login gratuitamente!</p>
             <div class="flex justify-center gap-2 mb-6">
                 <button id="show-login" class="px-4 py-2 rounded-xl font-semibold bg-brand-DEFAULT">Login</button>
                 <button id="show-register" class="px-4 py-2 rounded-xl font-semibold bg-slate-100 ">Cadastro</button>
@@ -117,7 +118,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="window.scrollTo(0,0)">
-                    <img src="images/logo_rep.jpeg" alt="Logo Reptilia" class="w-8 h-8 mr-2" />
+                    <img src="images/logo_rep.png" alt="Logo Reptilia" class="w-8 h-8 mr-2" />
                     <span class="font-heading font-bold text-2xl text-brand-dark tracking-tight">Reptilia</span>
                 </div>
                 <div class="hidden md:flex space-x-8">
@@ -710,41 +711,65 @@
             catalogGrid.insertBefore(newCard, catalogGrid.firstChild);
         }
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Substitua seu 'form.addEventListener' por este aqui
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-            const name = document.getElementById('animal-name').value;
-            const species = document.getElementById('animal-species').value;
-            const category = document.getElementById('animal-category').value;
-            const price = parseFloat(document.getElementById('animal-price').value).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            const desc = document.getElementById('animal-desc').value;
-            const defaultImage = 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                const name = document.getElementById('animal-name').value;
+                const species = document.getElementById('animal-species').value;
+                const category = document.getElementById('animal-category').value;
+                const price = parseFloat(document.getElementById('animal-price').value); // Envie como número
+                const desc = document.getElementById('animal-desc').value;
+                const defaultImage = 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                const file = fileInput.files[0];
 
-            const file = fileInput.files[0];
+                const postAnimalData = async (imgDataUrl) => {
+                    const animalData = {
+                        name,
+                        species,
+                        category,
+                        price,
+                        desc,
+                        imgSrc: imgDataUrl
+                    };
 
-            const commitCard = (imgSrc) => {
-                createCard(imgSrc, name, species, category, price, desc);
+                    try {
+                        // --- AQUI ESTÁ A MÁGICA ---
+                        const response = await fetch(`${API_BASE}/api/animais`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(animalData)
+                        });
 
-                // Limpar o formulário e preview
-                successAlert.classList.remove('hidden');
-                form.reset();
-                previewContainer.classList.add('hidden');
-                previewImg.src = '';
+                        if (!response.ok) {
+                            throw new Error('Falha ao salvar no servidor');
+                        }
+                        
+                        // Se salvou com sucesso, limpa e recarrega o catálogo
+                        form.reset();
+                        previewContainer.classList.add('hidden');
+                        previewImg.src = '';
+                        successAlert.classList.remove('hidden');
+                        setTimeout(() => successAlert.classList.add('hidden'), 2500);
 
-                setTimeout(() => {
-                    successAlert.classList.add('hidden');
-                    window.location.hash = '#catalogo';
-                }, 2500);
-            };
+                        await carregarAnimais(); // Recarrega o catálogo para mostrar o novo item
+                        window.location.hash = '#catalogo';
 
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = () => commitCard(reader.result);
-                reader.readAsDataURL(file);
-            } else {
-                commitCard(defaultImage);
-            }
-        });
+                    } catch (error) {
+                        console.error('Erro ao enviar animal:', error);
+                        alert('Houve um erro ao cadastrar o animal. Tente novamente.');
+                    }
+                };
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => postAnimalData(reader.result);
+                    reader.readAsDataURL(file);
+                } else {
+                    postAnimalData(defaultImage);
+                }
+            });
+
 
         // Diferenciais Modal (linhas do Sobre Nós)
         const diffData = {
@@ -798,27 +823,37 @@
         const showLoginBtn = document.getElementById('show-login');
         const showRegisterBtn = document.getElementById('show-register');
 
+        const API_BASE = 'http://127.0.0.1:3002'; // backend Express deve rodar em 3002, não em 3000 do Live Preview
         const users = { diego123: '123' };
         let backendAvailable = false;
 
         async function loadUsers() {
-            try {
-                const response = await fetch('/api/users');
-                if (!response.ok) throw new Error('API indisponível');
-                const data = await response.json();
-                Object.assign(users, data);
-                backendAvailable = true;
-            } catch (error) {
-                backendAvailable = false;
-                console.error('backend indisponível', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Servidor offline',
-                    text: 'Não foi possível carregar dados do backend. Reinicie o servidor Node e tente novamente.',
-                    timer: 2500,
-                    showConfirmButton: false
-                });
+            const endpoints = [`${API_BASE}/api/users`, 'http://localhost:3002/api/users'];
+            let lastError = null;
+
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await fetch(endpoint);
+                        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+                        const data = await response.json();
+                        Object.assign(users, data);
+                        backendAvailable = true;
+                        return;
+                    } catch (error) {
+                        lastError = error;
+                        console.warn(`Tentativa ${attempt}, endpoint ${endpoint} falhou:`, error);
+                    }
+                }
+
+                if (backendAvailable) break;
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
+
+            backendAvailable = false;
+            console.error('backend indisponível após tentativas:', lastError);
+            console.info('Verifique se o servidor Node está rodando em http://localhost:3000 e se você não está usando Live Preview na mesma porta.');
         }
 
         loadUsers().then(() => showTab('login'));
@@ -903,22 +938,32 @@
 
             users[username] = password;
 
-            if (backendAvailable) {
-                try {
-                    const response = await fetch('/api/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, password })
-                    });
-                    if (!response.ok) {
+            try {
+                const response = await fetch(`${API_BASE}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    let errMessage = 'Falha no cadastro';
+                    try {
                         const errorData = await response.json();
-                        throw new Error(errorData.message || 'Falha no cadastro');
+                        errMessage = errorData.message || errMessage;
+                    } catch (_parseError) {
+                        errMessage = `HTTP ${response.status} ${response.statusText}`;
                     }
-                } catch (err) {
-                    registerError.textContent = `Erro no servidor: ${err.message}`;
-                    registerError.classList.remove('hidden');
-                    return;
+                    throw new Error(errMessage);
                 }
+
+                await response.json();
+                users[username] = password;
+                backendAvailable = true;
+            } catch (err) {
+                backendAvailable = false;
+                registerError.textContent = `Erro no servidor: ${err.message}. Verifique se o backend está em execução no endpoint ${API_BASE}/api/register`;
+                registerError.classList.remove('hidden');
+                return;
             }
 
             registerError.classList.add('hidden');
@@ -942,6 +987,27 @@
                 closeDiffModal();
             }
         });
+
+        // Coloque esta função no início da seção de "Form Submit Simulation"
+async function carregarAnimais() {
+    try {
+        const response = await fetch(`${API_BASE}/api/animais`); // Usa a nova rota GET
+        const animais = await response.json();
+        catalogGrid.innerHTML = ''; // Limpa o grid antes de adicionar
+        animais.forEach(animal => {
+            // Formata o preço para exibição
+            const formattedPrice = parseFloat(animal.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            createCard(animal.imgSrc, animal.name, animal.species, animal.category, formattedPrice, animal.desc);
+        });
+    } catch (error) {
+        console.error('Falha ao carregar o catálogo:', error);
+    }
+}
+
+// Chame a função quando a página carregar
+document.addEventListener('DOMContentLoaded', carregarAnimais);
+
+
     </script>
 </body>
 </html>

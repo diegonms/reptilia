@@ -50,7 +50,60 @@ app.post('/api/register', (req, res) => {
   res.json({ message: 'Cadastro realizado com sucesso!' });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002; // Usar 3002 para evitar colisão com Live Preview do VS Code
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
+
+// ... (depois do código de users)
+
+const catalogFile = path.join(__dirname, 'reptilia-catalog.json');
+
+function readCatalog() {
+  try {
+    if (!fs.existsSync(catalogFile)) {
+      // Cria o arquivo com um exemplo se ele não existir
+      fs.writeFileSync(catalogFile, JSON.stringify([], null, 2), 'utf8');
+    }
+    const raw = fs.readFileSync(catalogFile, 'utf8');
+    return JSON.parse(raw || '[]');
+  } catch (error) {
+    console.error('Erro ao ler catalog file:', error);
+    return [];
+  }
+}
+
+function writeCatalog(catalog) {
+  fs.writeFileSync(catalogFile, JSON.stringify(catalog, null, 2), 'utf8');
+}
+
+// ROTA PARA OBTER TODOS OS ANIMAIS
+app.get('/api/animais', (req, res) => {
+  const catalog = readCatalog();
+  res.json(catalog);
+});
+
+// ROTA PARA ADICIONAR UM NOVO ANIMAL
+app.post('/api/animais', (req, res) => {
+  const { name, species, category, price, desc, imgSrc } = req.body;
+  if (!name || !species || !price) {
+    return res.status(400).json({ message: 'Nome, espécie e preço são obrigatórios.' });
+  }
+
+  const catalog = readCatalog();
+  
+  const newAnimal = {
+    id: Date.now(), // Uma forma simples de gerar um ID único
+    name,
+    species,
+    category,
+    price,
+    desc,
+    imgSrc
+  };
+
+  catalog.unshift(newAnimal); // Adiciona no início do array
+  writeCatalog(catalog);
+
+  res.status(201).json({ message: 'Animal cadastrado com sucesso!', animal: newAnimal });
 });
