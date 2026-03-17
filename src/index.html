@@ -798,7 +798,6 @@
         const showLoginBtn = document.getElementById('show-login');
         const showRegisterBtn = document.getElementById('show-register');
 
-        const storageKey = 'reptiliaUsers';
         const users = { diego123: '123' };
         let backendAvailable = false;
 
@@ -810,17 +809,16 @@
                 Object.assign(users, data);
                 backendAvailable = true;
             } catch (error) {
-                console.warn('backend indisponível, usando localStorage', error);
-                const stored = localStorage.getItem(storageKey);
-                if (stored) {
-                    Object.assign(users, JSON.parse(stored));
-                }
+                backendAvailable = false;
+                console.error('backend indisponível', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Servidor offline',
+                    text: 'Não foi possível carregar dados do backend. Reinicie o servidor Node e tente novamente.',
+                    timer: 2500,
+                    showConfirmButton: false
+                });
             }
-        }
-
-        function saveUsersLocal() {
-            const json = JSON.stringify(users, null, 2);
-            localStorage.setItem(storageKey, json);
         }
 
         loadUsers().then(() => showTab('login'));
@@ -923,7 +921,6 @@
                 }
             }
 
-            saveUsersLocal();
             registerError.classList.add('hidden');
             Swal.fire({
                 icon: 'success',
