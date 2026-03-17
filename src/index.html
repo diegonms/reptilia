@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reptilia | Animais Exóticos Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -63,6 +64,47 @@
 </head>
 <body class="bg-slate-50 text-slate-800 relative overflow-x-hidden font-sans selection:bg-brand-DEFAULT ">
 
+    <!-- Login / Cadastro Overlay -->
+    <div id="login-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8">
+            <h2 class="text-3xl font-heading font-bold text-brand-dark mb-4 text-center">Acesso Reptilia</h2>
+            <div class="flex justify-center gap-2 mb-6">
+                <button id="show-login" class="px-4 py-2 rounded-xl font-semibold bg-brand-DEFAULT">Login</button>
+                <button id="show-register" class="px-4 py-2 rounded-xl font-semibold bg-slate-100 ">Cadastro</button>
+            </div>
+
+            <form id="login-form" class="space-y-4" novalidate>
+                <div>
+                    <label for="login-user" class="block text-sm font-medium text-slate-700">Usuário</label>
+                    <input id="login-user" type="text" placeholder="Login" class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:border-brand-DEFAULT focus:ring-2 focus:ring-brand-DEFAULT/30" required>
+                </div>
+                <div>
+                    <label for="login-pass" class="block text-sm font-medium text-slate-700">Senha</label>
+                    <input id="login-pass" type="password" placeholder="Senha" class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:border-brand-DEFAULT focus:ring-2 focus:ring-brand-DEFAULT/30" required>
+                </div>
+                <div id="login-error" class="text-red-500 text-sm hidden">Usuário ou senha inválidos.</div>
+                <button type="submit" class="w-full py-3 bg-brand-DEFAULT rounded-xl font-medium hover:bg-brand-dark transition-colors">Entrar</button>
+            </form>
+
+            <form id="register-form" class="space-y-4 hidden" novalidate>
+                <div>
+                    <label for="register-user" class="block text-sm font-medium text-slate-700">Usuário</label>
+                    <input id="register-user" type="text" placeholder="Novo usuário" class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:border-brand-DEFAULT focus:ring-2 focus:ring-brand-DEFAULT/30" required>
+                </div>
+                <div>
+                    <label for="register-pass" class="block text-sm font-medium text-slate-700">Senha</label>
+                    <input id="register-pass" type="password" placeholder="Senha" class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:border-brand-DEFAULT focus:ring-2 focus:ring-brand-DEFAULT/30" required>
+                </div>
+                <div>
+                    <label for="register-pass-confirm" class="block text-sm font-medium text-slate-700">Confirmar Senha</label>
+                    <input id="register-pass-confirm" type="password" placeholder="Confirmar senha" class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:border-brand-DEFAULT focus:ring-2 focus:ring-brand-DEFAULT/30" required>
+                </div>
+                <div id="register-error" class="text-red-500 text-sm hidden">Erro no cadastro.</div>
+                <button type="submit" class="w-full py-3 bg-brand-DEFAULT rounded-xl font-medium hover:bg-brand-dark transition-colors">Cadastrar</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Background Blobs (for Glassmorphism contrast) -->
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
@@ -107,7 +149,7 @@
     <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
             <h1 class="font-heading text-5xl md:text-7xl font-bold text-brand-dark mb-6 leading-tight">
-                A Natureza Exótica <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-DEFAULT to-brand-blue">Na Sua Casa</span>
+                A Natureza Exórigmeogtica <br> <span class=" bg-clip-text bg-gradient-to-r from-brand-DEFAULT to-brand-blue">Na Sua Casa</span>
             </h1>
             <p class="mt-4 text-xl text-slate-600 max-w-2xl mx-auto mb-10">
                 Especialistas em cobras, tartarugas e araras. Animais criados com excelência, ética e documentação rigorosa para quem busca companheiros únicos.
@@ -745,6 +787,157 @@
         modalClose.addEventListener('click', closeDiffModal);
         modal.addEventListener('click', (event) => {
             if (event.target === modal) closeDiffModal();
+        });
+
+        // Login / Cadastro com SweetAlert2
+        const loginOverlay = document.getElementById('login-overlay');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginError = document.getElementById('login-error');
+        const registerError = document.getElementById('register-error');
+        const showLoginBtn = document.getElementById('show-login');
+        const showRegisterBtn = document.getElementById('show-register');
+
+        const storageKey = 'reptiliaUsers';
+        const users = { diego123: '123' };
+        let backendAvailable = false;
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users');
+                if (!response.ok) throw new Error('API indisponível');
+                const data = await response.json();
+                Object.assign(users, data);
+                backendAvailable = true;
+            } catch (error) {
+                console.warn('backend indisponível, usando localStorage', error);
+                const stored = localStorage.getItem(storageKey);
+                if (stored) {
+                    Object.assign(users, JSON.parse(stored));
+                }
+            }
+        }
+
+        function saveUsersLocal() {
+            const json = JSON.stringify(users, null, 2);
+            localStorage.setItem(storageKey, json);
+        }
+
+        loadUsers().then(() => showTab('login'));
+
+        function showTab(tab) {
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                showLoginBtn.classList.replace('bg-slate-100', 'bg-brand-DEFAULT');
+                showLoginBtn.classList.replace('text-slate-700', 'text-white');
+                showRegisterBtn.classList.replace('bg-brand-DEFAULT', 'bg-slate-100');
+                showRegisterBtn.classList.replace('text-white', 'text-slate-700');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                showLoginBtn.classList.replace('bg-brand-DEFAULT', 'bg-slate-100');
+                showLoginBtn.classList.replace('text-white', 'text-slate-700');
+                showRegisterBtn.classList.replace('bg-slate-100', 'bg-brand-DEFAULT');
+                showRegisterBtn.classList.replace('text-slate-700', 'text-white');
+            }
+            loginError.classList.add('hidden');
+            registerError.classList.add('hidden');
+        }
+
+        showLoginBtn.addEventListener('click', () => showTab('login'));
+        showRegisterBtn.addEventListener('click', () => showTab('register'));
+
+        loginForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('login-user').value.trim();
+            const password = document.getElementById('login-pass').value;
+
+            if (users[username] && users[username] === password) {
+                loginError.classList.add('hidden');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Bem-vindo!',
+                    text: 'Login realizado com sucesso.',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    willClose: () => {
+                        loginOverlay.classList.add('hidden');
+                    }
+                });
+            } else {
+                loginError.classList.remove('hidden');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Falha na autenticação',
+                    text: 'Usuário ou senha incorretos. Tente novamente.',
+                    confirmButtonText: 'Ok',
+                    footer: 'Usuário: diego123 | Senha: 123'
+                });
+            }
+        });
+
+        registerForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('register-user').value.trim();
+            const password = document.getElementById('register-pass').value;
+            const confirmPassword = document.getElementById('register-pass-confirm').value;
+
+            if (!username || !password || !confirmPassword) {
+                registerError.textContent = 'Preencha todos os campos.';
+                registerError.classList.remove('hidden');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                registerError.textContent = 'As senhas não coincidem.';
+                registerError.classList.remove('hidden');
+                return;
+            }
+
+            if (users[username]) {
+                registerError.textContent = 'Usuário já existe. Escolha outro nome.';
+                registerError.classList.remove('hidden');
+                return;
+            }
+
+            users[username] = password;
+
+            if (backendAvailable) {
+                try {
+                    const response = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Falha no cadastro');
+                    }
+                } catch (err) {
+                    registerError.textContent = `Erro no servidor: ${err.message}`;
+                    registerError.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            saveUsersLocal();
+            registerError.classList.add('hidden');
+            Swal.fire({
+                icon: 'success',
+                title: 'Cadastro realizado!',
+                text: 'Agora faça login com suas credenciais.',
+                timer: 1700,
+                showConfirmButton: false,
+                willClose: () => {
+                    document.getElementById('register-user').value = '';
+                    document.getElementById('register-pass').value = '';
+                    document.getElementById('register-pass-confirm').value = '';
+                    showTab('login');
+                }
+            });
         });
 
         document.addEventListener('keydown', (event) => {
