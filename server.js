@@ -1,109 +1,87 @@
+// 1. Importações essenciais
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 
+// 2. Importa a conexão com o banco de dados! ESTA É A PONTE!
+const db = require('./database.js'); 
+
 const app = express();
+
+// 3. Middlewares (configurações do servidor)
 app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'src')));
+app.use(express.json()); // Permite que o servidor entenda JSON
+app.use(express.static(path.join(__dirname, 'src'))); // Serve os arquivos estáticos do frontend
 
-const usersFile = path.join(__dirname, 'reptilia-users.json');
+// --- ROTAS DA API ---
 
-function readUsers() {
-  try {
-    if (!fs.existsSync(usersFile)) {
-      fs.writeFileSync(usersFile, JSON.stringify({ diego123: '123' }, null, 2), 'utf8');
+// ROTA PARA OBTER TODOS OS ANIMAIS (agora usando o banco de dados)
+app.get('/api/animais', (req, res) => {
+  const sql = "SELECT * FROM animais ORDER BY id DESC"; // Pega os mais recentes primeiro
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      res.status(500).json({ "error": err.message });
+      return;
     }
-    const raw = fs.readFileSync(usersFile, 'utf8');
-    return JSON.parse(raw || '{}');
-  } catch (error) {
-    console.error('Erro ao ler users file:', error);
-    return { diego123: '123' };
-  }
-}
-
-function writeUsers(users) {
-  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf8');
-}
-
-app.get('/api/users', (req, res) => {
-  const users = readUsers();
-  res.json(users);
+    // Se não houver erro, envia os resultados (rows) como JSON
+    res.json(rows);
+  });
 });
 
+// ROTA PARA ADICIONAR UM NOVO ANIMAL (agora usando o banco de dados)
+app.post('/api/animais', (req, res) => {
+  const { name, species, category, diet, imageUrl } = req.body;
+  if (!name || !species || !category) {
+    return res.status(400).json({ message: 'Nome, espécie e categoria são obrigatórios.' });
+  }
+
+  const sql = `INSERT INTO animais (name, species, category, diet, imageUrl) VALUES (?, ?, ?, ?, ?)`;
+  const params = [name, species, category, diet, imageUrl];
+
+  db.run(sql, params, function(err) {
+    if (err) {
+      res.status(500).json({ "error": err.message });
+      return;
+    }
+    // Retorna sucesso e o objeto recém-criado com seu novo ID
+    res.status(201).json({
+      message: 'Animal cadastrado com sucesso!',
+      animal: { id: this.lastID, name, species, category, diet, imageUrl }
+    });
+  });
+});
+
+// ROTA PARA REGISTRAR UM NOVO USUÁRIO (agora usando o banco de dados)
 app.post('/api/register', (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ message: 'Usuário e senha são obrigatórios.' });
   }
+  
+  // Primeiro, verifica se o usuário já existe
+  const checkSql = "SELECT * FROM users WHERE username = ?";
+  db.get(checkSql, [username], (err, row) => {
+    if (err) {
+      return res.status(500).json({ "error": err.message });
+    }
+    if (row) {
+      return res.status(409).json({ message: 'Usuário já existe.' });
+    }
 
-  const users = readUsers();
-
-  if (users[username]) {
-    return res.status(409).json({ message: 'Usuário já existe.' });
-  }
-
-  users[username] = password;
-  writeUsers(users);
-
-  res.json({ message: 'Cadastro realizado com sucesso!' });
+    // Se não existir, insere o novo usuário
+    const insertSql = 'INSERT INTO users (username, password) VALUES (?,?)';
+    db.run(insertSql, [username, password], (err) => {
+      if (err) {
+        return res.status(500).json({ "error": err.message });
+      }
+      res.json({ message: 'Cadastro realizado com sucesso!' });
+    });
+  });
 });
 
-const PORT = process.env.PORT || 3002; // Usar 3002 para evitar colisão com Live Preview do VS Code
+
+// 4. Inicia o servidor
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
-});
-
-// ... (depois do código de users)
-
-const catalogFile = path.join(__dirname, 'reptilia-catalog.json');
-
-function readCatalog() {
-  try {
-    if (!fs.existsSync(catalogFile)) {
-      // Cria o arquivo com um exemplo se ele não existir
-      fs.writeFileSync(catalogFile, JSON.stringify([], null, 2), 'utf8');
-    }
-    const raw = fs.readFileSync(catalogFile, 'utf8');
-    return JSON.parse(raw || '[]');
-  } catch (error) {
-    console.error('Erro ao ler catalog file:', error);
-    return [];
-  }
-}
-
-function writeCatalog(catalog) {
-  fs.writeFileSync(catalogFile, JSON.stringify(catalog, null, 2), 'utf8');
-}
-
-// ROTA PARA OBTER TODOS OS ANIMAIS
-app.get('/api/animais', (req, res) => {
-  const catalog = readCatalog();
-  res.json(catalog);
-});
-
-// ROTA PARA ADICIONAR UM NOVO ANIMAL
-app.post('/api/animais', (req, res) => {
-  const { name, species, category, price, desc, imgSrc } = req.body;
-  if (!name || !species || !price) {
-    return res.status(400).json({ message: 'Nome, espécie e preço são obrigatórios.' });
-  }
-
-  const catalog = readCatalog();
-  
-  const newAnimal = {
-    id: Date.now(), // Uma forma simples de gerar um ID único
-    name,
-    species,
-    category,
-    price,
-    desc,
-    imgSrc
-  };
-
-  catalog.unshift(newAnimal); // Adiciona no início do array
-  writeCatalog(catalog);
-
-  res.status(201).json({ message: 'Animal cadastrado com sucesso!', animal: newAnimal });
 });
