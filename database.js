@@ -21,15 +21,33 @@ const db = new sqlite3.Database(DB_SOURCE, (err) => {
             species TEXT NOT NULL,
             category TEXT NOT NULL,
             diet TEXT,
-            imageUrl TEXT
+            imageUrl TEXT,
+            price REAL,
+            desc TEXT,
+            imgSrc TEXT
         )`, (err) => {
             if (err) {
-                // Se houver erro na criação da tabela, exibe aqui
                 console.error("Erro ao criar tabela 'animais':", err.message);
             } else {
                 console.log("Tabela 'animais' pronta.");
             }
         });
+
+        // Adiciona colunas extras se já existir table antiga sem elas
+        const ensureColumn = (table, columnDef) => {
+            const [name] = columnDef.split(' ');
+            db.get(`PRAGMA table_info(${table})`, (err, row) => {
+                // Não precisa lógica complexa; se colúnulas já existem, ALTER TABLE falha e ignoramos no callback
+            });
+            db.run(`ALTER TABLE ${table} ADD COLUMN ${columnDef}`, (err) => {
+                if (err && !/duplicate column/i.test(err.message)) {
+                    console.warn(`Não foi possível adicionar coluna ${columnDef} em ${table}:`, err.message);
+                }
+            });
+        };
+        ensureColumn('animais', 'price REAL');
+        ensureColumn('animais', 'desc TEXT');
+        ensureColumn('animais', 'imgSrc TEXT');
 
         db.run(`CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

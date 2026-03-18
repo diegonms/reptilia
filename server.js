@@ -30,23 +30,26 @@ app.get('/api/animais', (req, res) => {
 
 // ROTA PARA ADICIONAR UM NOVO ANIMAL (agora usando o banco de dados)
 app.post('/api/animais', (req, res) => {
-  const { name, species, category, diet, imageUrl } = req.body;
+  const { name, species, category, diet, imageUrl, imgSrc, price, desc } = req.body;
   if (!name || !species || !category) {
     return res.status(400).json({ message: 'Nome, espécie e categoria são obrigatórios.' });
   }
 
-  const sql = `INSERT INTO animais (name, species, category, diet, imageUrl) VALUES (?, ?, ?, ?, ?)`;
-  const params = [name, species, category, diet, imageUrl];
+  const finalImageUrl = imageUrl || imgSrc || null;
+
+  const sql = `INSERT INTO animais (name, species, category, diet, imageUrl, price, desc, imgSrc) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+  const params = [name, species, category, diet || null, finalImageUrl, price || null, desc || null, imgSrc || null];
 
   db.run(sql, params, function(err) {
     if (err) {
+      console.error('Erro no INSERT animais:', err);
       res.status(500).json({ "error": err.message });
       return;
     }
     // Retorna sucesso e o objeto recém-criado com seu novo ID
     res.status(201).json({
       message: 'Animal cadastrado com sucesso!',
-      animal: { id: this.lastID, name, species, category, diet, imageUrl }
+      animal: { id: this.lastID, name, species, category, diet, imageUrl: finalImageUrl, price, desc, imgSrc } 
     });
   });
 });

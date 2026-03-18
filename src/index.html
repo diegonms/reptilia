@@ -729,9 +729,11 @@
                         name,
                         species,
                         category,
+                        diet: 'Omnívoro',
                         price,
                         desc,
-                        imgSrc: imgDataUrl
+                        imgSrc: imgDataUrl,
+                        imageUrl: imgDataUrl
                     };
 
                     try {
@@ -743,7 +745,9 @@
                         });
 
                         if (!response.ok) {
-                            throw new Error('Falha ao salvar no servidor');
+                            const errText = await response.text();
+                            console.error('Erro no cadastro de animal: ', response.status, errText);
+                            throw new Error(`Falha ao salvar no servidor (${response.status})`);
                         }
                         
                         // Se salvou com sucesso, limpa e recarrega o catálogo
