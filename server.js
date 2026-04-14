@@ -1,6 +1,6 @@
 // Carrega .env (DATABASE_URL) para desenvolvimento local
 require('dotenv').config();
-
+console.log("DATABASE_URL:", process.env.DATABASE_URL);
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
