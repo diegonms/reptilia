@@ -66,6 +66,42 @@ app.post('/api/animais', async (req, res) => {
     }
 });
 
+// Remove um animal do catálogo (apenas admin)
+app.delete('/api/animais/:id', async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ message: 'ID inválido.' });
+    }
+
+    // Verificação leve: o cliente precisa enviar o username do admin no header.
+    // Não é segurança forte (ainda não temos JWT/sessão no servidor), mas evita
+    // que o endpoint seja chamado sem qualquer contexto de admin.
+    const requester = req.header('x-username');
+    if (!requester) {
+        return res.status(401).json({ message: 'Autenticação necessária.' });
+    }
+
+    try {
+        const userRes = await db.query(
+            'SELECT is_admin FROM users WHERE username = $1',
+            [requester]
+        );
+        if (userRes.rowCount === 0 || userRes.rows[0].is_admin !== true) {
+            return res.status(403).json({ message: 'Apenas administradores podem excluir animais.' });
+        }
+
+        const del = await db.query('DELETE FROM animais WHERE id = $1', [id]);
+        if (del.rowCount === 0) {
+            return res.status(404).json({ message: 'Animal não encontrado.' });
+        }
+
+        res.json({ message: 'Animal removido com sucesso.', id });
+    } catch (err) {
+        console.error('Erro no DELETE /api/animais/:id:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Registro de usuário (nunca cria admin pelo endpoint público)
 app.post('/api/register', async (req, res) => {
     const { username, password } = req.body;
@@ -87,6 +123,29 @@ app.post('/api/register', async (req, res) => {
         res.json({ message: 'Cadastro realizado com sucesso!' });
     } catch (err) {
         console.error('Erro no /api/register:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Lista de usuários (apenas admin) — usada pelo painel de clientes
+app.get('/api/users', async (req, res) => {
+    const requester = req.header('x-username');
+    if (!requester) {
+        return res.status(401).json({ message: 'Autenticação necessária.' });
+    }
+
+    try {
+        const who = await db.query('SELECT is_admin FROM users WHERE username = $1', [requester]);
+        if (who.rowCount === 0 || who.rows[0].is_admin !== true) {
+            return res.status(403).json({ message: 'Apenas administradores podem listar usuários.' });
+        }
+
+        const rows = await db.query(
+            'SELECT id, username, is_admin FROM users ORDER BY id ASC'
+        );
+        res.json(rows.rows);
+    } catch (err) {
+        console.error('Erro no GET /api/users:', err);
         res.status(500).json({ error: err.message });
     }
 });

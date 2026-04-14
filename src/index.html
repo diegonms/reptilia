@@ -123,10 +123,11 @@
                     <span class="font-heading font-bold text-2xl text-brand-dark tracking-tight">Reptilia</span>
                 </div>
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="#sobre" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Sobre</a>
-                    <a href="#catalogo" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Catálogo</a>
-                    <a href="#diferenciais" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Diferenciais</a>
-                    <a href="#precos" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Preços</a>
+                    <a href="#sobre" data-user-only class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Sobre</a>
+                    <a href="#catalogo" data-user-only class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Catálogo</a>
+                    <a href="#diferenciais" data-user-only class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Diferenciais</a>
+                    <a href="#precos" data-user-only class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Preços</a>
+                    <a href="#clientes" data-admin-only class="hidden text-slate-600 hover:text-brand-DEFAULT font-medium transition">Clientes</a>
                     <a href="#inventario" data-admin-only class="hidden text-slate-600 hover:text-brand-DEFAULT font-medium transition">Inventário</a>
                     <span id="user-badge" class="hidden text-sm font-semibold text-slate-700"></span>
                     <button id="logout-btn" class="hidden inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold bg-emerald-700 text-white shadow-md hover:bg-emerald-800 transition-colors">
@@ -143,17 +144,18 @@
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden glass border-t border-white/40">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#sobre" class="block px-3 py-2 text-slate-600 font-medium">Sobre</a>
-                <a href="#catalogo" class="block px-3 py-2 text-slate-600 font-medium">Catálogo</a>
-                <a href="#precos" class="block px-3 py-2 text-slate-600 font-medium">Preços</a>
-                <a href="#inventario" data-admin-only class="hidden px-3 py-2 text-slate-600 font-medium">Inventário</a>
+                <a href="#sobre" data-user-only class="block px-3 py-2 text-slate-600 font-medium">Sobre</a>
+                <a href="#catalogo" data-user-only class="block px-3 py-2 text-slate-600 font-medium">Catálogo</a>
+                <a href="#precos" data-user-only class="block px-3 py-2 text-slate-600 font-medium">Preços</a>
+                <a href="#clientes" data-admin-only class="hidden block px-3 py-2 text-slate-600 font-medium">Clientes</a>
+                <a href="#inventario" data-admin-only class="hidden block px-3 py-2 text-slate-600 font-medium">Inventário</a>
                 <button id="mobile-logout-btn" class="hidden w-full text-left block px-3 py-2 text-brand-DEFAULT font-semibold">Sair</button>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+    <section data-user-only class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
             <h1 class="font-heading text-5xl md:text-7xl font-bold text-brand-dark mb-6 leading-tight">
                 A Natureza Exótica <br> <span class=" bg-clip-text bg-gradient-to-r from-brand-DEFAULT to-brand-blue">Na Sua Casa</span>
@@ -188,7 +190,7 @@
     </section>
 
     <!-- Sobre o Negócio -->
-    <section id="sobre" class="py-20 relative">
+    <section id="sobre" data-user-only class="py-20 relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row items-center gap-12">
                 <div class="lg:w-1/2 relative group">
@@ -224,7 +226,7 @@
     </section>
 
     <!-- Catálogo de Animais -->
-    <section id="catalogo" class="py-24 relative">
+    <section id="catalogo" data-user-only class="py-24 relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h4 class="text-brand-blue font-semibold tracking-wider uppercase mb-2">Disponíveis</h4>
@@ -296,7 +298,7 @@
     </section>
 
     <!-- Diferenciais -->
-    <section id="diferenciais" class="py-20 bg-brand-light/30">
+    <section id="diferenciais" data-user-only class="py-20 bg-brand-light/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="font-heading text-4xl font-bold text-brand-dark mb-16">Nossos Diferenciais</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -346,7 +348,7 @@
     </div>
 
     <!-- Preços -->
-    <section id="precos" class="py-20 relative bg-slate-50 text-slate-900">
+    <section id="precos" data-user-only class="py-20 relative bg-slate-50 text-slate-900">
         <!-- SVG background overlay -->
         <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'\#ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
         
@@ -413,7 +415,7 @@
     </section>
 
     <!-- Depoimentos -->
-    <section class="py-24 relative overflow-hidden">
+    <section data-user-only class="py-24 relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <h2 class="font-heading text-4xl font-bold text-center text-brand-dark mb-16">O Que Dizem Nossos Clientes</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -467,7 +469,7 @@
     </section>
 
     <!-- FAQ -->
-    <section class="py-20 bg-slate-100" id="faq">
+    <section data-user-only class="py-20 bg-slate-100" id="faq">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="font-heading text-4xl font-bold text-center text-brand-dark mb-12">Perguntas Frequentes</h2>
             <div class="space-y-4">
@@ -500,6 +502,42 @@
                     <div class="faq-content max-h-0 overflow-hidden transition-all duration-300 px-6">
                         <p class="pb-5 text-slate-600">Sim. Fornecemos um atestado de saúde assinado por nosso médico veterinário antes do embarque. Além disso, oferecemos uma garantia de saúde inicial de 30 dias para suporte em adaptação.</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Painel de Clientes — apenas ADM -->
+    <section id="clientes" data-admin-only class="hidden pt-32 pb-12 relative">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass p-8 md:p-10 rounded-3xl shadow-xl border-t border-white">
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+                    <div>
+                        <span class="inline-block bg-brand-DEFAULT/10 text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide mb-3">Painel do Administrador</span>
+                        <h2 class="font-heading text-3xl font-bold text-brand-dark">Clientes Cadastrados</h2>
+                        <p class="text-slate-500 mt-2">Lista de usuários com acesso ao site.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span id="clients-count" class="text-sm text-slate-500"></span>
+                        <button id="refresh-clients-btn" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+                            <i class="fa-solid fa-arrows-rotate"></i> Atualizar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white/60">
+                    <table class="min-w-full divide-y divide-slate-200 text-sm">
+                        <thead class="bg-slate-100/70 text-slate-600 uppercase text-xs tracking-wider">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold">ID</th>
+                                <th class="px-4 py-3 text-left font-semibold">Usuário</th>
+                                <th class="px-4 py-3 text-left font-semibold">Perfil</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clients-tbody" class="divide-y divide-slate-100 text-slate-700">
+                            <tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">Carregando...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -571,7 +609,7 @@
     </section>
 
     <!-- Rodapé -->
-    <footer class="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
+    <footer data-user-only class="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="col-span-1 md:col-span-1">
@@ -696,14 +734,27 @@
             reader.readAsDataURL(file);
         });
 
-        function createCard(imgSrc, name, species, category, price, desc) {
+        function createCard(id, imgSrc, name, species, category, price, desc) {
+            const session = getSession();
+            const isAdmin = !!(session && session.is_admin);
+
             const newCard = document.createElement('div');
-            newCard.className = 'glass rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col';
+            newCard.className = 'glass rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col relative';
+            newCard.dataset.animalId = id;
+
+            const deleteButtonHtml = isAdmin ? `
+                <button type="button" data-delete-animal="${id}" title="Excluir animal"
+                    class="absolute top-4 left-4 z-30 w-10 h-10 flex items-center justify-center rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 transition-colors">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            ` : '';
+
             newCard.innerHTML = `
                 <div class="relative h-64 overflow-hidden">
                     <div class="absolute inset-0 bg-brand-dark/20 group-hover:bg-transparent transition-all z-10"></div>
                     <img src="${imgSrc}" alt="${name}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
                     <span class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">${category}</span>
+                    ${deleteButtonHtml}
                 </div>
                 <div class="p-6 flex-grow flex flex-col">
                     <div class="flex justify-between items-start mb-4">
@@ -837,16 +888,24 @@
         const showLoginBtn = document.getElementById('show-login');
         const showRegisterBtn = document.getElementById('show-register');
 
-        // Se a página está sendo servida pelo Express, usa a mesma origem.
-        // Se foi aberta direto pelo Live Preview/arquivo, cai no backend em 3000.
-        const API_BASE = (location.protocol === 'http:' || location.protocol === 'https:')
-            ? location.origin
-            : 'http://127.0.0.1:3000';
+        // Se a página está sendo servida pelo Express (mesma origem), usa location.origin.
+        // Se foi aberta pelo Live Server (porta 5500 / outra) ou como file://,
+        // cai no backend local em http://localhost:3000.
+        const API_BASE = (() => {
+            if (location.protocol === 'file:') return 'http://127.0.0.1:3000';
+            const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
+            if (isLocalhost && location.port !== '3000') {
+                return 'http://localhost:3000';
+            }
+            return location.origin;
+        })();
+        console.log('API_BASE:', API_BASE);
         const SESSION_KEY = 'reptilia_session';
         const logoutBtn = document.getElementById('logout-btn');
         const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
         const userBadge = document.getElementById('user-badge');
         const adminOnlyEls = document.querySelectorAll('[data-admin-only]');
+        const userOnlyEls = document.querySelectorAll('[data-user-only]');
 
         function getSession() {
             try {
@@ -872,6 +931,10 @@
             adminOnlyEls.forEach(el => {
                 el.classList.toggle('hidden', !isAdmin);
             });
+            // Seções e links para visitantes/user comum: ficam escondidas se for admin
+            userOnlyEls.forEach(el => {
+                el.classList.toggle('hidden', isAdmin);
+            });
 
             if (session) {
                 loginOverlay.classList.add('hidden');
@@ -884,6 +947,15 @@
                 userBadge.classList.add('hidden');
                 logoutBtn.classList.add('hidden');
                 mobileLogoutBtn.classList.add('hidden');
+            }
+
+            // Catálogo só existe na visão do usuário comum — recarrega quando ela está visível
+            if (!isAdmin && typeof carregarAnimais === 'function') {
+                carregarAnimais();
+            }
+            // Lista de clientes só faz sentido quando admin está logado
+            if (isAdmin && typeof carregarClientes === 'function') {
+                carregarClientes();
             }
         }
 
@@ -997,7 +1069,7 @@
                         title: 'Falha na autenticação',
                         text: 'Usuário ou senha incorretos. Tente novamente.',
                         confirmButtonText: 'Ok',
-                        footer: 'Admin padrão: admin / admin123'
+                        footer: ''
                     });
                     return;
                 }
@@ -1092,7 +1164,104 @@
             }
         });
 
+        // Clique no botão de excluir (apenas admin vê, mas valida mesmo assim)
+        catalogGrid.addEventListener('click', async (event) => {
+            const btn = event.target.closest('[data-delete-animal]');
+            if (!btn) return;
+
+            const session = getSession();
+            if (!session || !session.is_admin) return;
+
+            const id = btn.getAttribute('data-delete-animal');
+
+            const confirmResult = await Swal.fire({
+                icon: 'warning',
+                title: 'Excluir este animal?',
+                text: 'Esta ação não pode ser desfeita.',
+                showCancelButton: true,
+                confirmButtonText: 'Sim, excluir',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                reverseButtons: true,
+                focusCancel: true
+            });
+            if (!confirmResult.isConfirmed) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/animais/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'x-username': session.username }
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.message || `HTTP ${response.status}`);
+                }
+
+                await carregarAnimais();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Animal excluído',
+                    timer: 1200,
+                    showConfirmButton: false
+                });
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Falha ao excluir',
+                    text: err.message
+                });
+            }
+        });
+
         // Coloque esta função no início da seção de "Form Submit Simulation"
+async function carregarClientes() {
+    const tbody = document.getElementById('clients-tbody');
+    const countEl = document.getElementById('clients-count');
+    if (!tbody) return;
+
+    const session = getSession();
+    if (!session || !session.is_admin) return;
+
+    tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">Carregando...</td></tr>`;
+
+    try {
+        const response = await fetch(`${API_BASE}/api/users`, {
+            headers: { 'x-username': session.username }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const clientes = await response.json();
+        countEl.textContent = `${clientes.length} cadastrado(s)`;
+
+        if (clientes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">Nenhum cliente cadastrado ainda.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = clientes.map(c => `
+            <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-mono text-xs text-slate-500">#${c.id}</td>
+                <td class="px-4 py-3 font-semibold">${c.username}</td>
+                <td class="px-4 py-3">
+                    ${c.is_admin
+                        ? '<span class="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-brand-DEFAULT/10 text-brand-dark"><i class="fa-solid fa-shield-halved"></i> ADMIN</span>'
+                        : '<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full bg-slate-100 text-slate-600"><i class="fa-solid fa-user"></i> Cliente</span>'}
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-red-500">Falha ao carregar: ${err.message}</td></tr>`;
+        countEl.textContent = '';
+    }
+}
+
+const refreshClientsBtn = document.getElementById('refresh-clients-btn');
+if (refreshClientsBtn) {
+    refreshClientsBtn.addEventListener('click', carregarClientes);
+}
+
 async function carregarAnimais() {
     try {
         const response = await fetch(`${API_BASE}/api/animais`); // Usa a nova rota GET
@@ -1101,7 +1270,7 @@ async function carregarAnimais() {
         animais.forEach(animal => {
             // Formata o preço para exibição
             const formattedPrice = parseFloat(animal.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            createCard(animal.imgSrc, animal.name, animal.species, animal.category, formattedPrice, animal.desc);
+            createCard(animal.id, animal.imgSrc, animal.name, animal.species, animal.category, formattedPrice, animal.desc);
         });
     } catch (error) {
         console.error('Falha ao carregar o catálogo:', error);
