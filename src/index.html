@@ -122,12 +122,14 @@
                     <img src="images/logo_rep.png" alt="Logo Reptilia" class="w-8 h-8 mr-2" />
                     <span class="font-heading font-bold text-2xl text-brand-dark tracking-tight">Reptilia</span>
                 </div>
-                <div class="hidden md:flex space-x-8">
+                <div class="hidden md:flex items-center space-x-8">
                     <a href="#sobre" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Sobre</a>
                     <a href="#catalogo" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Catálogo</a>
                     <a href="#diferenciais" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Diferenciais</a>
                     <a href="#precos" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Preços</a>
-                    <a href="#inventario" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Inventário</a>
+                    <a href="#inventario" data-admin-only class="hidden text-slate-600 hover:text-brand-DEFAULT font-medium transition">Inventário</a>
+                    <span id="user-badge" class="hidden text-sm text-slate-500"></span>
+                    <button id="logout-btn" class="hidden px-4 py-2 rounded-xl font-semibold bg-brand-DEFAULT text-white hover:bg-brand-dark transition-colors">Sair</button>
                 </div>
                 <div class="md:hidden flex items-center">
                     <button id="mobile-menu-btn" class="text-slate-600 hover:text-brand-DEFAULT focus:outline-none">
@@ -142,7 +144,8 @@
                 <a href="#sobre" class="block px-3 py-2 text-slate-600 font-medium">Sobre</a>
                 <a href="#catalogo" class="block px-3 py-2 text-slate-600 font-medium">Catálogo</a>
                 <a href="#precos" class="block px-3 py-2 text-slate-600 font-medium">Preços</a>
-                <a href="#inventario" class="block px-3 py-2 text-slate-600 font-medium">Inventário</a>
+                <a href="#inventario" data-admin-only class="hidden px-3 py-2 text-slate-600 font-medium">Inventário</a>
+                <button id="mobile-logout-btn" class="hidden w-full text-left block px-3 py-2 text-brand-DEFAULT font-semibold">Sair</button>
             </div>
         </div>
     </nav>
@@ -500,11 +503,12 @@
         </div>
     </section>
 
-    <!-- Formulário de Inventário (Adicionar Animal) -->
-    <section id="inventario" class="py-24 relative">
+    <!-- Formulário de Inventário (Adicionar Animal) — apenas ADM -->
+    <section id="inventario" data-admin-only class="hidden py-24 relative">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="glass p-8 md:p-12 rounded-3xl shadow-xl border-t border-white">
                 <div class="text-center mb-10">
+                    <span class="inline-block bg-brand-DEFAULT/10 text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide mb-3">Painel do Administrador</span>
                     <h2 class="font-heading text-3xl font-bold text-brand-dark">Adicionar ao Inventário</h2>
                     <p class="text-slate-500 mt-2">Área restrita para cadastro de novos espécimes</p>
                 </div>
@@ -829,39 +833,67 @@
         const showRegisterBtn = document.getElementById('show-register');
 
         const API_BASE = 'http://127.0.0.1:3002'; // backend Express deve rodar em 3002, não em 3000 do Live Preview
-        const users = { diego123: '123' };
-        let backendAvailable = false;
+        const SESSION_KEY = 'reptilia_session';
+        const logoutBtn = document.getElementById('logout-btn');
+        const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+        const userBadge = document.getElementById('user-badge');
+        const adminOnlyEls = document.querySelectorAll('[data-admin-only]');
 
-        async function loadUsers() {
-            const endpoints = [`${API_BASE}/api/users`, 'http://localhost:3002/api/users'];
-            let lastError = null;
-
-            for (let attempt = 1; attempt <= 3; attempt++) {
-                for (const endpoint of endpoints) {
-                    try {
-                        const response = await fetch(endpoint);
-                        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-
-                        const data = await response.json();
-                        Object.assign(users, data);
-                        backendAvailable = true;
-                        return;
-                    } catch (error) {
-                        lastError = error;
-                        console.warn(`Tentativa ${attempt}, endpoint ${endpoint} falhou:`, error);
-                    }
-                }
-
-                if (backendAvailable) break;
-                await new Promise(resolve => setTimeout(resolve, 500));
+        function getSession() {
+            try {
+                const raw = sessionStorage.getItem(SESSION_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (_e) {
+                return null;
             }
-
-            backendAvailable = false;
-            console.error('backend indisponível após tentativas:', lastError);
-            console.info('Verifique se o servidor Node está rodando em http://localhost:3000 e se você não está usando Live Preview na mesma porta.');
         }
 
-        loadUsers().then(() => showTab('login'));
+        function setSession(user) {
+            sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        }
+
+        function clearSession() {
+            sessionStorage.removeItem(SESSION_KEY);
+        }
+
+        function applySession() {
+            const session = getSession();
+            const isAdmin = !!(session && session.is_admin);
+
+            adminOnlyEls.forEach(el => {
+                el.classList.toggle('hidden', !isAdmin);
+            });
+
+            if (session) {
+                loginOverlay.classList.add('hidden');
+                userBadge.textContent = `${session.username}${isAdmin ? ' (ADM)' : ''}`;
+                userBadge.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                mobileLogoutBtn.classList.remove('hidden');
+            } else {
+                loginOverlay.classList.remove('hidden');
+                userBadge.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
+                mobileLogoutBtn.classList.add('hidden');
+            }
+        }
+
+        function logout() {
+            clearSession();
+            applySession();
+            Swal.fire({
+                icon: 'success',
+                title: 'Sessão encerrada',
+                timer: 1200,
+                showConfirmButton: false
+            });
+        }
+
+        logoutBtn.addEventListener('click', logout);
+        mobileLogoutBtn.addEventListener('click', logout);
+
+        applySession();
+        showTab('login');
 
         function showTab(tab) {
             if (tab === 'login') {
@@ -886,32 +918,51 @@
         showLoginBtn.addEventListener('click', () => showTab('login'));
         showRegisterBtn.addEventListener('click', () => showTab('register'));
 
-        loginForm.addEventListener('submit', function(event) {
+        loginForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
             const username = document.getElementById('login-user').value.trim();
             const password = document.getElementById('login-pass').value;
 
-            if (users[username] && users[username] === password) {
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    loginError.classList.remove('hidden');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Falha na autenticação',
+                        text: 'Usuário ou senha incorretos. Tente novamente.',
+                        confirmButtonText: 'Ok',
+                        footer: 'Admin padrão: admin / admin123'
+                    });
+                    return;
+                }
+
+                const data = await response.json();
+                setSession(data.user);
                 loginError.classList.add('hidden');
+
                 Swal.fire({
                     icon: 'success',
-                    title: 'Bem-vindo!',
-                    text: 'Login realizado com sucesso.',
+                    title: `Bem-vindo, ${data.user.username}!`,
+                    text: data.user.is_admin ? 'Acesso de administrador concedido.' : 'Login realizado com sucesso.',
                     timer: 1500,
                     showConfirmButton: false,
                     willClose: () => {
-                        loginOverlay.classList.add('hidden');
+                        applySession();
+                        loginForm.reset();
                     }
                 });
-            } else {
-                loginError.classList.remove('hidden');
+            } catch (err) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Falha na autenticação',
-                    text: 'Usuário ou senha incorretos. Tente novamente.',
-                    confirmButtonText: 'Ok',
-                    footer: 'Usuário: diego123 | Senha: 123'
+                    title: 'Servidor indisponível',
+                    text: `Não foi possível contatar ${API_BASE}/api/login. Verifique se o backend está rodando.`
                 });
             }
         });
@@ -935,14 +986,6 @@
                 return;
             }
 
-            if (users[username]) {
-                registerError.textContent = 'Usuário já existe. Escolha outro nome.';
-                registerError.classList.remove('hidden');
-                return;
-            }
-
-            users[username] = password;
-
             try {
                 const response = await fetch(`${API_BASE}/api/register`, {
                     method: 'POST',
@@ -962,10 +1005,7 @@
                 }
 
                 await response.json();
-                users[username] = password;
-                backendAvailable = true;
             } catch (err) {
-                backendAvailable = false;
                 registerError.textContent = `Erro no servidor: ${err.message}. Verifique se o backend está em execução no endpoint ${API_BASE}/api/register`;
                 registerError.classList.remove('hidden');
                 return;

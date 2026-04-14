@@ -60,7 +60,7 @@ app.post('/api/register', (req, res) => {
   if (!username || !password) {
     return res.status(400).json({ message: 'Usuário e senha são obrigatórios.' });
   }
-  
+
   // Primeiro, verifica se o usuário já existe
   const checkSql = "SELECT * FROM users WHERE username = ?";
   db.get(checkSql, [username], (err, row) => {
@@ -71,13 +71,39 @@ app.post('/api/register', (req, res) => {
       return res.status(409).json({ message: 'Usuário já existe.' });
     }
 
-    // Se não existir, insere o novo usuário
-    const insertSql = 'INSERT INTO users (username, password) VALUES (?,?)';
+    // Usuários criados pelo cadastro público nunca são admin
+    const insertSql = 'INSERT INTO users (username, password, is_admin) VALUES (?,?,0)';
     db.run(insertSql, [username, password], (err) => {
       if (err) {
         return res.status(500).json({ "error": err.message });
       }
       res.json({ message: 'Cadastro realizado com sucesso!' });
+    });
+  });
+});
+
+// ROTA DE LOGIN — valida credenciais e devolve dados da sessão (incluindo is_admin)
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Usuário e senha são obrigatórios.' });
+  }
+
+  const sql = "SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?";
+  db.get(sql, [username, password], (err, row) => {
+    if (err) {
+      return res.status(500).json({ "error": err.message });
+    }
+    if (!row) {
+      return res.status(401).json({ message: 'Usuário ou senha inválidos.' });
+    }
+    res.json({
+      message: 'Login realizado com sucesso!',
+      user: {
+        id: row.id,
+        username: row.username,
+        is_admin: row.is_admin === 1
+      }
     });
   });
 });

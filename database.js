@@ -52,12 +52,24 @@ const db = new sqlite3.Database(DB_SOURCE, (err) => {
         db.run(`CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL
+            password TEXT NOT NULL,
+            is_admin INTEGER NOT NULL DEFAULT 0
         )`, (err) => {
             if (err) {
                 console.error("Erro ao criar tabela 'users':", err.message);
             } else {
                 console.log("Tabela 'users' pronta.");
+                ensureColumn('users', 'is_admin INTEGER NOT NULL DEFAULT 0');
+
+                // Seed do usuário administrador padrão (login: admin / senha: admin123)
+                const seedSql = `INSERT OR IGNORE INTO users (username, password, is_admin) VALUES (?, ?, 1)`;
+                db.run(seedSql, ['admin', 'admin123'], (seedErr) => {
+                    if (seedErr) {
+                        console.warn('Não foi possível criar admin padrão:', seedErr.message);
+                    } else {
+                        console.log("Usuário admin padrão pronto (admin / admin123).");
+                    }
+                });
             }
         });
     }
