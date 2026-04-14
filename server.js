@@ -1,116 +1,129 @@
-// 1. Importações essenciais
+// Carrega .env (DATABASE_URL) para desenvolvimento local
+require('dotenv').config();
+
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
 
-// 2. Importa a conexão com o banco de dados! ESTA É A PONTE!
-const db = require('./database.js'); 
+const db = require('./database.js');
 
 const app = express();
 
-// 3. Middlewares (configurações do servidor)
 app.use(cors());
-app.use(express.json()); // Permite que o servidor entenda JSON
-app.use(express.static(path.join(__dirname, 'src'))); // Serve os arquivos estáticos do frontend
+app.use(express.json({ limit: '10mb' })); // imagens em base64 podem ser grandes
+app.use(express.static(path.join(__dirname, 'src')));
 
 // --- ROTAS DA API ---
 
-// ROTA PARA OBTER TODOS OS ANIMAIS (agora usando o banco de dados)
-app.get('/api/animais', (req, res) => {
-  const sql = "SELECT * FROM animais ORDER BY id DESC"; // Pega os mais recentes primeiro
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      res.status(500).json({ "error": err.message });
-      return;
+// Lista todos os animais (mais recentes primeiro)
+// Aliases transformam snake_case do DB em camelCase p/ o frontend
+app.get('/api/animais', async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT id, name, species, category, diet,
+                   image_url   AS "imageUrl",
+                   price,
+                   description AS "desc",
+                   img_src     AS "imgSrc"
+            FROM animais
+            ORDER BY id DESC
+        `);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Erro no GET /api/animais:', err);
+        res.status(500).json({ error: err.message });
     }
-    // Se não houver erro, envia os resultados (rows) como JSON
-    res.json(rows);
-  });
 });
 
-// ROTA PARA ADICIONAR UM NOVO ANIMAL (agora usando o banco de dados)
-app.post('/api/animais', (req, res) => {
-  const { name, species, category, diet, imageUrl, imgSrc, price, desc } = req.body;
-  if (!name || !species || !category) {
-    return res.status(400).json({ message: 'Nome, espécie e categoria são obrigatórios.' });
-  }
-
-  const finalImageUrl = imageUrl || imgSrc || null;
-
-  const sql = `INSERT INTO animais (name, species, category, diet, imageUrl, price, desc, imgSrc) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-  const params = [name, species, category, diet || null, finalImageUrl, price || null, desc || null, imgSrc || null];
-
-  db.run(sql, params, function(err) {
-    if (err) {
-      console.error('Erro no INSERT animais:', err);
-      res.status(500).json({ "error": err.message });
-      return;
+// Cadastra um novo animal
+app.post('/api/animais', async (req, res) => {
+    const { name, species, category, diet, imageUrl, imgSrc, price, desc } = req.body;
+    if (!name || !species || !category) {
+        return res.status(400).json({ message: 'Nome, espécie e categoria são obrigatórios.' });
     }
-    // Retorna sucesso e o objeto recém-criado com seu novo ID
-    res.status(201).json({
-      message: 'Animal cadastrado com sucesso!',
-      animal: { id: this.lastID, name, species, category, diet, imageUrl: finalImageUrl, price, desc, imgSrc } 
-    });
-  });
+
+    const finalImageUrl = imageUrl || imgSrc || null;
+
+    try {
+        const result = await db.query(
+            `INSERT INTO animais (name, species, category, diet, image_url, price, description, img_src)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+             RETURNING id`,
+            [name, species, category, diet || null, finalImageUrl, price || null, desc || null, imgSrc || null]
+        );
+
+        res.status(201).json({
+            message: 'Animal cadastrado com sucesso!',
+            animal: {
+                id: result.rows[0].id,
+                name, species, category, diet,
+                imageUrl: finalImageUrl, price, desc, imgSrc
+            }
+        });
+    } catch (err) {
+        console.error('Erro no INSERT animais:', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// ROTA PARA REGISTRAR UM NOVO USUÁRIO (agora usando o banco de dados)
-app.post('/api/register', (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Usuário e senha são obrigatórios.' });
-  }
-
-  // Primeiro, verifica se o usuário já existe
-  const checkSql = "SELECT * FROM users WHERE username = ?";
-  db.get(checkSql, [username], (err, row) => {
-    if (err) {
-      return res.status(500).json({ "error": err.message });
-    }
-    if (row) {
-      return res.status(409).json({ message: 'Usuário já existe.' });
+// Registro de usuário (nunca cria admin pelo endpoint público)
+app.post('/api/register', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Usuário e senha são obrigatórios.' });
     }
 
-    // Usuários criados pelo cadastro público nunca são admin
-    const insertSql = 'INSERT INTO users (username, password, is_admin) VALUES (?,?,0)';
-    db.run(insertSql, [username, password], (err) => {
-      if (err) {
-        return res.status(500).json({ "error": err.message });
-      }
-      res.json({ message: 'Cadastro realizado com sucesso!' });
-    });
-  });
+    try {
+        const existing = await db.query("SELECT id FROM users WHERE username = $1", [username]);
+        if (existing.rowCount > 0) {
+            return res.status(409).json({ message: 'Usuário já existe.' });
+        }
+
+        await db.query(
+            'INSERT INTO users (username, password, is_admin) VALUES ($1, $2, FALSE)',
+            [username, password]
+        );
+
+        res.json({ message: 'Cadastro realizado com sucesso!' });
+    } catch (err) {
+        console.error('Erro no /api/register:', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// ROTA DE LOGIN — valida credenciais e devolve dados da sessão (incluindo is_admin)
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Usuário e senha são obrigatórios.' });
-  }
+// Login — retorna dados da sessão, incluindo is_admin
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Usuário e senha são obrigatórios.' });
+    }
 
-  const sql = "SELECT id, username, is_admin FROM users WHERE username = ? AND password = ?";
-  db.get(sql, [username, password], (err, row) => {
-    if (err) {
-      return res.status(500).json({ "error": err.message });
+    try {
+        const result = await db.query(
+            "SELECT id, username, is_admin FROM users WHERE username = $1 AND password = $2",
+            [username, password]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(401).json({ message: 'Usuário ou senha inválidos.' });
+        }
+
+        const row = result.rows[0];
+        res.json({
+            message: 'Login realizado com sucesso!',
+            user: {
+                id: row.id,
+                username: row.username,
+                is_admin: row.is_admin === true
+            }
+        });
+    } catch (err) {
+        console.error('Erro no /api/login:', err);
+        res.status(500).json({ error: err.message });
     }
-    if (!row) {
-      return res.status(401).json({ message: 'Usuário ou senha inválidos.' });
-    }
-    res.json({
-      message: 'Login realizado com sucesso!',
-      user: {
-        id: row.id,
-        username: row.username,
-        is_admin: row.is_admin === 1
-      }
-    });
-  });
 });
 
-
-// 4. Inicia o servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
