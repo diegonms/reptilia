@@ -128,8 +128,10 @@
                     <a href="#diferenciais" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Diferenciais</a>
                     <a href="#precos" class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Preços</a>
                     <a href="#inventario" data-admin-only class="hidden text-slate-600 hover:text-brand-DEFAULT font-medium transition">Inventário</a>
-                    <span id="user-badge" class="hidden text-sm text-slate-500"></span>
-                    <button id="logout-btn" class="hidden px-4 py-2 rounded-xl font-semibold bg-brand-DEFAULT text-white hover:bg-brand-dark transition-colors">Sair</button>
+                    <span id="user-badge" class="hidden text-sm font-semibold text-slate-700"></span>
+                    <button id="logout-btn" class="hidden inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold bg-emerald-700 text-white shadow-md hover:bg-emerald-800 transition-colors">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair
+                    </button>
                 </div>
                 <div class="md:hidden flex items-center">
                     <button id="mobile-menu-btn" class="text-slate-600 hover:text-brand-DEFAULT focus:outline-none">
@@ -511,6 +513,9 @@
                     <span class="inline-block bg-brand-DEFAULT/10 text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide mb-3">Painel do Administrador</span>
                     <h2 class="font-heading text-3xl font-bold text-brand-dark">Adicionar ao Inventário</h2>
                     <p class="text-slate-500 mt-2">Área restrita para cadastro de novos espécimes</p>
+                    <button id="admin-logout-btn" type="button" class="mt-4 inline-flex items-center gap-2 px-5 py-2 rounded-xl font-semibold bg-slate-900 text-white hover:bg-slate-700 transition-colors">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair do ADM e entrar como outro usuário
+                    </button>
                 </div>
                 <form id="inventory-form" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -832,7 +837,11 @@
         const showLoginBtn = document.getElementById('show-login');
         const showRegisterBtn = document.getElementById('show-register');
 
-        const API_BASE = 'http://127.0.0.1:3002'; // backend Express deve rodar em 3002, não em 3000 do Live Preview
+        // Se a página está sendo servida pelo Express, usa a mesma origem.
+        // Se foi aberta direto pelo Live Preview/arquivo, cai no backend em 3000.
+        const API_BASE = (location.protocol === 'http:' || location.protocol === 'https:')
+            ? location.origin
+            : 'http://127.0.0.1:3000';
         const SESSION_KEY = 'reptilia_session';
         const logoutBtn = document.getElementById('logout-btn');
         const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
@@ -878,7 +887,35 @@
             }
         }
 
-        function logout() {
+        async function confirmLogout({ title, text, confirmText }) {
+            const result = await Swal.fire({
+                icon: 'question',
+                title,
+                text,
+                showCancelButton: true,
+                confirmButtonText: confirmText,
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#047857',
+                cancelButtonColor: '#64748b',
+                reverseButtons: true,
+                focusCancel: true
+            });
+            return result.isConfirmed;
+        }
+
+        async function logout() {
+            const session = getSession();
+            const isAdmin = !!(session && session.is_admin);
+
+            const confirmed = await confirmLogout({
+                title: isAdmin ? 'Sair do painel de ADM?' : 'Encerrar sessão?',
+                text: isAdmin
+                    ? 'Você vai perder o acesso à área de administrador até fazer login novamente.'
+                    : 'Tem certeza que deseja sair da sua conta?',
+                confirmText: isAdmin ? 'Sim, sair do ADM' : 'Sim, sair'
+            });
+            if (!confirmed) return;
+
             clearSession();
             applySession();
             Swal.fire({
@@ -891,6 +928,28 @@
 
         logoutBtn.addEventListener('click', logout);
         mobileLogoutBtn.addEventListener('click', logout);
+
+        const adminLogoutBtn = document.getElementById('admin-logout-btn');
+        adminLogoutBtn.addEventListener('click', async () => {
+            const confirmed = await confirmLogout({
+                title: 'Sair do painel de ADM?',
+                text: 'Você vai poder entrar como outro usuário em seguida.',
+                confirmText: 'Sim, sair do ADM'
+            });
+            if (!confirmed) return;
+
+            clearSession();
+            applySession();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showTab('login');
+            Swal.fire({
+                icon: 'info',
+                title: 'Saindo do painel de ADM',
+                text: 'Entre com outra conta para continuar navegando.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        });
 
         applySession();
         showTab('login');

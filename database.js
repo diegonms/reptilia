@@ -11,10 +11,12 @@ const db = new sqlite3.Database(DB_SOURCE, (err) => {
       // Se houver erro ao abrir o banco, exibe no console
       console.error(err.message);
       throw err;
-    } else {
-        console.log('Conectado ao banco de dados SQLite.');
-        // O código para criar as tabelas vai aqui
-        // O `run` executa um comando SQL sem retornar dados
+    }
+
+    console.log('Conectado ao banco de dados SQLite.');
+
+    // Força execução sequencial de todas as operações de schema / seed
+    db.serialize(() => {
         db.run(`CREATE TABLE IF NOT EXISTS animais (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -26,25 +28,19 @@ const db = new sqlite3.Database(DB_SOURCE, (err) => {
             desc TEXT,
             imgSrc TEXT
         )`, (err) => {
-            if (err) {
-                console.error("Erro ao criar tabela 'animais':", err.message);
-            } else {
-                console.log("Tabela 'animais' pronta.");
-            }
+            if (err) console.error("Erro ao criar tabela 'animais':", err.message);
+            else console.log("Tabela 'animais' pronta.");
         });
 
-        // Adiciona colunas extras se já existir table antiga sem elas
+        // Adiciona colunas extras se já existir tabela antiga sem elas
         const ensureColumn = (table, columnDef) => {
-            const [name] = columnDef.split(' ');
-            db.get(`PRAGMA table_info(${table})`, (err, row) => {
-                // Não precisa lógica complexa; se colúnulas já existem, ALTER TABLE falha e ignoramos no callback
-            });
             db.run(`ALTER TABLE ${table} ADD COLUMN ${columnDef}`, (err) => {
                 if (err && !/duplicate column/i.test(err.message)) {
                     console.warn(`Não foi possível adicionar coluna ${columnDef} em ${table}:`, err.message);
                 }
             });
         };
+
         ensureColumn('animais', 'price REAL');
         ensureColumn('animais', 'desc TEXT');
         ensureColumn('animais', 'imgSrc TEXT');
@@ -55,24 +51,27 @@ const db = new sqlite3.Database(DB_SOURCE, (err) => {
             password TEXT NOT NULL,
             is_admin INTEGER NOT NULL DEFAULT 0
         )`, (err) => {
-            if (err) {
-                console.error("Erro ao criar tabela 'users':", err.message);
-            } else {
-                console.log("Tabela 'users' pronta.");
-                ensureColumn('users', 'is_admin INTEGER NOT NULL DEFAULT 0');
-
-                // Seed do usuário administrador padrão (login: admin / senha: admin123)
-                const seedSql = `INSERT OR IGNORE INTO users (username, password, is_admin) VALUES (?, ?, 1)`;
-                db.run(seedSql, ['admin', 'admin123'], (seedErr) => {
-                    if (seedErr) {
-                        console.warn('Não foi possível criar admin padrão:', seedErr.message);
-                    } else {
-                        console.log("Usuário admin padrão pronto (admin / admin123).");
-                    }
-                });
-            }
+            if (err) console.error("Erro ao criar tabela 'users':", err.message);
+            else console.log("Tabela 'users' pronta.");
         });
-    }
+
+        // Para bancos antigos sem is_admin. SQLite não aceita NOT NULL em ADD COLUMN
+        // quando a tabela já tem linhas, então adicionamos apenas com DEFAULT.
+        ensureColumn('users', 'is_admin INTEGER DEFAULT 0');
+
+        // Seed do usuário administrador padrão (login: admin / senha: admin123)
+        db.run(
+            `INSERT OR IGNORE INTO users (username, password, is_admin) VALUES (?, ?, 1)`,
+            ['admin', 'admin123'],
+            (seedErr) => {
+                if (seedErr) {
+                    console.warn('Não foi possível criar admin padrão:', seedErr.message);
+                } else {
+                    console.log("Usuário admin padrão pronto (admin / admin123).");
+                }
+            }
+        );
+    });
 });
 
 // Exporta a conexão do banco para que outros arquivos (como o server.js) possam usá-la
