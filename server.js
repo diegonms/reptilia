@@ -66,6 +66,48 @@ app.post('/api/animais', async (req, res) => {
     }
 });
 
+// Atualiza um animal (apenas admin)
+app.put('/api/animais/:id', async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ message: 'ID inválido.' });
+    }
+
+    const requester = req.header('x-username');
+    if (!requester) {
+        return res.status(401).json({ message: 'Autenticação necessária.' });
+    }
+
+    try {
+        const userRes = await db.query(
+            'SELECT is_admin FROM users WHERE username = $1',
+            [requester]
+        );
+        if (userRes.rowCount === 0 || userRes.rows[0].is_admin !== true) {
+            return res.status(403).json({ message: 'Apenas administradores podem editar animais.' });
+        }
+
+        const { name, species, category, diet, price, desc } = req.body;
+        if (!name || !species || !category) {
+            return res.status(400).json({ message: 'Nome, espécie e categoria são obrigatórios.' });
+        }
+
+        const upd = await db.query(
+            `UPDATE animais
+                SET name = $1, species = $2, category = $3, diet = $4, price = $5, description = $6
+              WHERE id = $7`,
+            [name, species, category, diet || null, price || null, desc || null, id]
+        );
+        if (upd.rowCount === 0) {
+            return res.status(404).json({ message: 'Animal não encontrado.' });
+        }
+        res.json({ message: 'Animal atualizado com sucesso.', id });
+    } catch (err) {
+        console.error('Erro no PUT /api/animais/:id:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Remove um animal do catálogo (apenas admin)
 app.delete('/api/animais/:id', async (req, res) => {
     const id = parseInt(req.params.id, 10);

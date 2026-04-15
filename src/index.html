@@ -66,8 +66,9 @@
 <body class="bg-slate-50 text-slate-800 relative overflow-x-hidden font-sans selection:bg-brand-DEFAULT ">
 
     <!-- Login / Cadastro Overlay -->
-    <div id="login-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 p-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8">
+    <div id="login-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 relative">
+            <button id="login-overlay-close" type="button" aria-label="Fechar" class="absolute top-4 right-4 text-slate-500 hover:text-slate-900 text-xl">✕</button>
             <h2 class="text-3xl font-heading font-bold text-brand-dark mb-4 text-center">Acesso Reptilia</h2>
             <p class="text-xl text-center">Faça o seu login gratuitamente!</p>
             <div class="flex justify-center gap-2 mb-6">
@@ -129,7 +130,11 @@
                     <a href="#precos" data-user-only class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Preços</a>
                     <a href="#clientes" data-admin-only class="hidden text-slate-600 hover:text-brand-DEFAULT font-medium transition">Clientes</a>
                     <a href="#inventario" data-admin-only class="hidden text-slate-600 hover:text-brand-DEFAULT font-medium transition">Inventário</a>
+                    <a href="#gerenciar-animais" data-admin-only class="hidden text-slate-600 hover:text-brand-DEFAULT font-medium transition">Animais</a>
                     <span id="user-badge" class="hidden text-sm font-semibold text-slate-700"></span>
+                    <button id="login-btn" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold bg-emerald-700 text-white shadow-md hover:bg-emerald-800 transition-colors">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login
+                    </button>
                     <button id="logout-btn" class="hidden inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold bg-emerald-700 text-white shadow-md hover:bg-emerald-800 transition-colors">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
@@ -149,6 +154,8 @@
                 <a href="#precos" data-user-only class="block px-3 py-2 text-slate-600 font-medium">Preços</a>
                 <a href="#clientes" data-admin-only class="hidden block px-3 py-2 text-slate-600 font-medium">Clientes</a>
                 <a href="#inventario" data-admin-only class="hidden block px-3 py-2 text-slate-600 font-medium">Inventário</a>
+                <a href="#gerenciar-animais" data-admin-only class="hidden block px-3 py-2 text-slate-600 font-medium">Animais</a>
+                <button id="mobile-login-btn" class="w-full text-left block px-3 py-2 text-brand-DEFAULT font-semibold">Login</button>
                 <button id="mobile-logout-btn" class="hidden w-full text-left block px-3 py-2 text-brand-DEFAULT font-semibold">Sair</button>
             </div>
         </div>
@@ -250,7 +257,7 @@
                             <span class="font-bold text-brand-DEFAULT text-xl">R$ 1.800</span>
                         </div>
                         <p class="text-slate-600 text-sm mb-6 flex-grow">Cobras extremamente dóceis, ideais para iniciantes. Cores vibrantes e excelente estado de saúde. Alimentando-se perfeitamente.</p>
-                        <button class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
+                        <button data-require-login class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
                     </div>
                 </div>
 
@@ -270,7 +277,7 @@
                             <span class="font-bold text-brand-DEFAULT text-xl">R$ 950</span>
                         </div>
                         <p class="text-slate-600 text-sm mb-6 flex-grow">Filhotes nascidos em cativeiro com carapaças perfeitas. Extremamente interativos e adaptáveis ao clima tropical brasileiro.</p>
-                        <button class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
+                        <button data-require-login class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
                     </div>
                 </div>
 
@@ -290,7 +297,7 @@
                             <span class="font-bold text-brand-DEFAULT text-xl">R$ 18.500</span>
                         </div>
                         <p class="text-slate-600 text-sm mb-6 flex-grow">Aves mansas criadas na mão (hand-fed). Plumagem impecável, anilhadas e sexadas por DNA. Companheiras para a vida toda.</p>
-                        <button class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
+                        <button data-require-login class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
                     </div>
                 </div>
             </div>
@@ -373,7 +380,7 @@
                         <li class="flex items-center text-sm opacity-50"><i class="fa-solid fa-xmark text-red-400 mr-3"></i> Kit Inicial de Habitat</li>
                         <li class="flex items-center text-sm opacity-50"><i class="fa-solid fa-xmark text-red-400 mr-3"></i> Suporte Veterinário Local</li>
                     </ul>
-                    <button class="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors">Selecionar Essencial</button>
+                    <button data-require-login class="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors">Selecionar Essencial</button>
                 </div>
 
                 <!-- Tier 2 (Highlighted) -->
@@ -391,7 +398,7 @@
                         <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-600 mr-3"></i> 1 mês de Suporte Online</li>
                         <li class="flex items-center text-sm opacity-50"><i class="fa-solid fa-xmark text-red-400 mr-3"></i> Suporte Veterinário Presencial</li>
                     </ul>
-                    <button class="w-full py-4 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold hover:shadow-lg hover:scale-[1.02] transition-all">Selecionar Premium</button>
+                    <button data-require-login class="w-full py-4 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold hover:shadow-lg hover:scale-[1.02] transition-all">Selecionar Premium</button>
                 </div>
 
                 <!-- Tier 3 -->
@@ -408,7 +415,7 @@
                         <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-500 mr-3"></i> 1 Ano de Suporte 24/7</li>
                         <li class="flex items-center text-sm"><i class="fa-solid fa-check text-emerald-500 mr-3"></i> 2 Consultas Vet Locais Inclusas</li>
                     </ul>
-                    <button class="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors">Selecionar VIP</button>
+                    <button data-require-login class="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors">Selecionar VIP</button>
                 </div>
             </div>
         </div>
@@ -608,6 +615,88 @@
         </div>
     </section>
 
+    <!-- Gerenciamento de Animais (ADM) -->
+    <section id="gerenciar-animais" data-admin-only class="hidden py-16 relative">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass p-8 md:p-10 rounded-3xl shadow-xl border-t border-white">
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+                    <div>
+                        <span class="inline-block bg-brand-DEFAULT/10 text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide mb-3">Painel do Administrador</span>
+                        <h2 class="font-heading text-3xl font-bold text-brand-dark">Animais Cadastrados</h2>
+                        <p class="text-slate-500 mt-2">Edite ou exclua os animais do catálogo.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span id="animals-count" class="text-sm text-slate-500"></span>
+                        <button id="refresh-animals-btn" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+                            <i class="fa-solid fa-arrows-rotate"></i> Atualizar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white/60">
+                    <table class="min-w-full divide-y divide-slate-200 text-sm">
+                        <thead class="bg-slate-100/70 text-slate-600 uppercase text-xs tracking-wider">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold">ID</th>
+                                <th class="px-4 py-3 text-left font-semibold">Nome</th>
+                                <th class="px-4 py-3 text-left font-semibold">Espécie</th>
+                                <th class="px-4 py-3 text-left font-semibold">Categoria</th>
+                                <th class="px-4 py-3 text-left font-semibold">Preço</th>
+                                <th class="px-4 py-3 text-right font-semibold">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="animals-tbody" class="divide-y divide-slate-100 text-slate-700">
+                            <tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal de Edição de Animal -->
+    <div id="edit-animal-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative">
+            <button id="edit-animal-close" type="button" aria-label="Fechar" class="absolute top-4 right-4 text-slate-500 hover:text-slate-900 text-xl">✕</button>
+            <h3 class="text-2xl font-heading font-bold text-brand-dark mb-4">Editar Animal</h3>
+            <form id="edit-animal-form" class="space-y-4">
+                <input type="hidden" id="edit-animal-id" />
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Nome Comum</label>
+                        <input type="text" id="edit-animal-name" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-DEFAULT outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Espécie</label>
+                        <input type="text" id="edit-animal-species" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-DEFAULT outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                        <select id="edit-animal-category" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-DEFAULT outline-none">
+                            <option value="Répteis">Cobra / Réptil</option>
+                            <option value="Quelônios">Tartaruga / Quelônio</option>
+                            <option value="Aves">Arara / Ave</option>
+                            <option value="Anfíbios">Anfíbio</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Preço (R$)</label>
+                        <input type="number" step="0.01" id="edit-animal-price" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-DEFAULT outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+                    <textarea id="edit-animal-desc" rows="3" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-DEFAULT outline-none resize-none"></textarea>
+                </div>
+                <button type="submit" class="w-full py-3 bg-brand-dark text-white rounded-xl font-bold hover:bg-brand-DEFAULT transition-colors">
+                    <i class="fa-solid fa-floppy-disk mr-2"></i> Salvar Alterações
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Rodapé -->
     <footer data-user-only class="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -765,7 +854,7 @@
                         <span class="font-bold text-brand-DEFAULT text-xl">R$ ${price}</span>
                     </div>
                     <p class="text-slate-600 text-sm mb-6 flex-grow">${desc}</p>
-                    <button class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
+                    <button data-require-login class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
                 </div>
             `;
 
@@ -903,9 +992,21 @@
         const SESSION_KEY = 'reptilia_session';
         const logoutBtn = document.getElementById('logout-btn');
         const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+        const loginBtn = document.getElementById('login-btn');
+        const mobileLoginBtn = document.getElementById('mobile-login-btn');
+        const loginOverlayClose = document.getElementById('login-overlay-close');
         const userBadge = document.getElementById('user-badge');
         const adminOnlyEls = document.querySelectorAll('[data-admin-only]');
         const userOnlyEls = document.querySelectorAll('[data-user-only]');
+
+        function openLogin() {
+            showTab('login');
+            loginOverlay.classList.remove('hidden');
+        }
+
+        function closeLogin() {
+            loginOverlay.classList.add('hidden');
+        }
 
         function getSession() {
             try {
@@ -942,11 +1043,14 @@
                 userBadge.classList.remove('hidden');
                 logoutBtn.classList.remove('hidden');
                 mobileLogoutBtn.classList.remove('hidden');
+                loginBtn.classList.add('hidden');
+                mobileLoginBtn.classList.add('hidden');
             } else {
-                loginOverlay.classList.remove('hidden');
                 userBadge.classList.add('hidden');
                 logoutBtn.classList.add('hidden');
                 mobileLogoutBtn.classList.add('hidden');
+                loginBtn.classList.remove('hidden');
+                mobileLoginBtn.classList.remove('hidden');
             }
 
             // Catálogo só existe na visão do usuário comum — recarrega quando ela está visível
@@ -956,6 +1060,9 @@
             // Lista de clientes só faz sentido quando admin está logado
             if (isAdmin && typeof carregarClientes === 'function') {
                 carregarClientes();
+            }
+            if (isAdmin && typeof carregarAnimaisAdmin === 'function') {
+                carregarAnimaisAdmin();
             }
         }
 
@@ -1000,6 +1107,23 @@
 
         logoutBtn.addEventListener('click', logout);
         mobileLogoutBtn.addEventListener('click', logout);
+
+        loginBtn.addEventListener('click', openLogin);
+        mobileLoginBtn.addEventListener('click', openLogin);
+        loginOverlayClose.addEventListener('click', closeLogin);
+        loginOverlay.addEventListener('click', (event) => {
+            if (event.target === loginOverlay) closeLogin();
+        });
+
+        // Qualquer botão com data-require-login abre o modal de login se não houver sessão
+        document.addEventListener('click', (event) => {
+            const trigger = event.target.closest('[data-require-login]');
+            if (!trigger) return;
+            if (getSession()) return;
+            event.preventDefault();
+            event.stopPropagation();
+            openLogin();
+        }, true);
 
         const adminLogoutBtn = document.getElementById('admin-logout-btn');
         adminLogoutBtn.addEventListener('click', async () => {
@@ -1278,7 +1402,176 @@ async function carregarAnimais() {
 }
 
 // Chame a função quando a página carregar
-document.addEventListener('DOMContentLoaded', carregarAnimais);
+document.addEventListener('DOMContentLoaded', () => {
+    carregarAnimais();
+    const session = getSession();
+    if (session && session.is_admin) carregarAnimaisAdmin();
+});
+
+// --- Gerenciamento de animais (ADM) ---
+const animalsTbody = document.getElementById('animals-tbody');
+const animalsCount = document.getElementById('animals-count');
+const refreshAnimalsBtn = document.getElementById('refresh-animals-btn');
+const editAnimalModal = document.getElementById('edit-animal-modal');
+const editAnimalForm = document.getElementById('edit-animal-form');
+const editAnimalClose = document.getElementById('edit-animal-close');
+
+async function carregarAnimaisAdmin() {
+    if (!animalsTbody) return;
+    const session = getSession();
+    if (!session || !session.is_admin) return;
+
+    animalsTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">Carregando...</td></tr>`;
+    try {
+        const response = await fetch(`${API_BASE}/api/animais`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const animais = await response.json();
+        animalsCount.textContent = `${animais.length} animal(is)`;
+
+        if (animais.length === 0) {
+            animalsTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">Nenhum animal cadastrado.</td></tr>`;
+            return;
+        }
+
+        animalsTbody.innerHTML = animais.map(a => {
+            const priceFmt = a.price != null
+                ? parseFloat(a.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                : '-';
+            return `
+                <tr class="hover:bg-slate-50" data-animal-row="${a.id}">
+                    <td class="px-4 py-3 font-mono text-xs text-slate-500">#${a.id}</td>
+                    <td class="px-4 py-3 font-semibold">${a.name ?? ''}</td>
+                    <td class="px-4 py-3 italic text-slate-600">${a.species ?? ''}</td>
+                    <td class="px-4 py-3">${a.category ?? ''}</td>
+                    <td class="px-4 py-3">R$ ${priceFmt}</td>
+                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                        <button type="button" data-edit-animal="${a.id}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-brand-DEFAULT text-white hover:bg-brand-dark transition-colors text-xs font-semibold">
+                            <i class="fa-solid fa-pen"></i> Editar
+                        </button>
+                        <button type="button" data-delete-animal-adm="${a.id}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors text-xs font-semibold ml-1">
+                            <i class="fa-solid fa-trash"></i> Excluir
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        animalsTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-red-500">Falha ao carregar: ${err.message}</td></tr>`;
+        animalsCount.textContent = '';
+    }
+}
+
+if (refreshAnimalsBtn) refreshAnimalsBtn.addEventListener('click', carregarAnimaisAdmin);
+
+function openEditAnimal(animal) {
+    document.getElementById('edit-animal-id').value = animal.id;
+    document.getElementById('edit-animal-name').value = animal.name ?? '';
+    document.getElementById('edit-animal-species').value = animal.species ?? '';
+    document.getElementById('edit-animal-category').value = animal.category ?? 'Répteis';
+    document.getElementById('edit-animal-price').value = animal.price ?? '';
+    document.getElementById('edit-animal-desc').value = animal.desc ?? '';
+    editAnimalModal.classList.remove('hidden');
+}
+
+function closeEditAnimal() {
+    editAnimalModal.classList.add('hidden');
+    editAnimalForm.reset();
+}
+
+editAnimalClose.addEventListener('click', closeEditAnimal);
+editAnimalModal.addEventListener('click', (event) => {
+    if (event.target === editAnimalModal) closeEditAnimal();
+});
+
+animalsTbody.addEventListener('click', async (event) => {
+    const session = getSession();
+    if (!session || !session.is_admin) return;
+
+    const editBtn = event.target.closest('[data-edit-animal]');
+    if (editBtn) {
+        const id = editBtn.getAttribute('data-edit-animal');
+        try {
+            const response = await fetch(`${API_BASE}/api/animais`);
+            const animais = await response.json();
+            const animal = animais.find(a => String(a.id) === String(id));
+            if (!animal) throw new Error('Animal não encontrado.');
+            openEditAnimal(animal);
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'Falha ao abrir edição', text: err.message });
+        }
+        return;
+    }
+
+    const delBtn = event.target.closest('[data-delete-animal-adm]');
+    if (delBtn) {
+        const id = delBtn.getAttribute('data-delete-animal-adm');
+        const confirmResult = await Swal.fire({
+            icon: 'warning',
+            title: 'Excluir este animal?',
+            text: 'Esta ação não pode ser desfeita.',
+            showCancelButton: true,
+            confirmButtonText: 'Sim, excluir',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            reverseButtons: true,
+            focusCancel: true
+        });
+        if (!confirmResult.isConfirmed) return;
+
+        try {
+            const response = await fetch(`${API_BASE}/api/animais/${id}`, {
+                method: 'DELETE',
+                headers: { 'x-username': session.username }
+            });
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.message || `HTTP ${response.status}`);
+            }
+            await carregarAnimaisAdmin();
+            await carregarAnimais();
+            Swal.fire({ icon: 'success', title: 'Animal excluído', timer: 1200, showConfirmButton: false });
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'Falha ao excluir', text: err.message });
+        }
+    }
+});
+
+editAnimalForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const session = getSession();
+    if (!session || !session.is_admin) return;
+
+    const id = document.getElementById('edit-animal-id').value;
+    const payload = {
+        name: document.getElementById('edit-animal-name').value.trim(),
+        species: document.getElementById('edit-animal-species').value.trim(),
+        category: document.getElementById('edit-animal-category').value,
+        price: parseFloat(document.getElementById('edit-animal-price').value) || null,
+        desc: document.getElementById('edit-animal-desc').value.trim()
+    };
+
+    try {
+        const response = await fetch(`${API_BASE}/api/animais/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-username': session.username
+            },
+            body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.message || `HTTP ${response.status}`);
+        }
+        closeEditAnimal();
+        await carregarAnimaisAdmin();
+        await carregarAnimais();
+        Swal.fire({ icon: 'success', title: 'Animal atualizado', timer: 1200, showConfirmButton: false });
+    } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Falha ao atualizar', text: err.message });
+    }
+});
 
 
     </script>
