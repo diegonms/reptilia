@@ -6,6 +6,7 @@
     <title>Reptilia | Animais Exóticos Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="icon" type="image/x-icon" href="/src/images/logo_rep-removebg-preview.svg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -78,21 +79,21 @@
 
             <form id="login-form" class="space-y-4" novalidate>
                 <div>
-                    <label for="login-user" class="block text-sm font-medium text-slate-700">Usuário</label>
-                    <input id="login-user" type="text" placeholder="Login" class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:border-brand-DEFAULT focus:ring-2 focus:ring-brand-DEFAULT/30" required>
+                    <label for="login-user" class="block text-sm font-medium text-slate-700">Email</label>
+                    <input id="login-user" type="email" placeholder="seu@email.com" class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:border-brand-DEFAULT focus:ring-2 focus:ring-brand-DEFAULT/30" required>
                 </div>
                 <div>
                     <label for="login-pass" class="block text-sm font-medium text-slate-700">Senha</label>
                     <input id="login-pass" type="password" placeholder="Senha" class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:border-brand-DEFAULT focus:ring-2 focus:ring-brand-DEFAULT/30" required>
                 </div>
-                <div id="login-error" class="text-red-500 text-sm hidden">Usuário ou senha inválidos.</div>
+                <div id="login-error" class="text-red-500 text-sm hidden">Email ou senha inválidos.</div>
                 <button type="submit" class="w-full py-3 bg-brand-DEFAULT rounded-xl font-medium hover:bg-brand-dark transition-colors">Entrar</button>
             </form>
 
             <form id="register-form" class="space-y-4 hidden" novalidate>
                 <div>
-                    <label for="register-user" class="block text-sm font-medium text-slate-700">Usuário</label>
-                    <input id="register-user" type="text" placeholder="Novo usuário" class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:border-brand-DEFAULT focus:ring-2 focus:ring-brand-DEFAULT/30" required>
+                    <label for="register-user" class="block text-sm font-medium text-slate-700">Email</label>
+                    <input id="register-user" type="email" placeholder="seu@email.com" class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:border-brand-DEFAULT focus:ring-2 focus:ring-brand-DEFAULT/30" required>
                 </div>
                 <div>
                     <label for="register-pass" class="block text-sm font-medium text-slate-700">Senha</label>
@@ -874,45 +875,32 @@
                 const file = fileInput.files[0];
 
                 const postAnimalData = async (imgDataUrl) => {
-                    const animalData = {
+                    const { error } = await supabase.from('animais').insert({
                         name,
                         species,
                         category,
                         diet: 'Omnívoro',
                         price,
-                        desc,
-                        imgSrc: imgDataUrl,
-                        imageUrl: imgDataUrl
-                    };
+                        description: desc,
+                        image_url: imgDataUrl,
+                        img_src: imgDataUrl
+                    });
 
-                    try {
-                        // --- AQUI ESTÁ A MÁGICA ---
-                        const response = await fetch(`${API_BASE}/api/animais`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(animalData)
-                        });
-
-                        if (!response.ok) {
-                            const errText = await response.text();
-                            console.error('Erro no cadastro de animal: ', response.status, errText);
-                            throw new Error(`Falha ao salvar no servidor (${response.status})`);
-                        }
-                        
-                        // Se salvou com sucesso, limpa e recarrega o catálogo
-                        form.reset();
-                        previewContainer.classList.add('hidden');
-                        previewImg.src = '';
-                        successAlert.classList.remove('hidden');
-                        setTimeout(() => successAlert.classList.add('hidden'), 2500);
-
-                        await carregarAnimais(); // Recarrega o catálogo para mostrar o novo item
-                        window.location.hash = '#catalogo';
-
-                    } catch (error) {
+                    if (error) {
                         console.error('Erro ao enviar animal:', error);
-                        alert('Houve um erro ao cadastrar o animal. Tente novamente.');
+                        alert('Houve um erro ao cadastrar o animal: ' + error.message);
+                        return;
                     }
+
+                    form.reset();
+                    previewContainer.classList.add('hidden');
+                    previewImg.src = '';
+                    successAlert.classList.remove('hidden');
+                    setTimeout(() => successAlert.classList.add('hidden'), 2500);
+
+                    await carregarAnimais();
+                    if (typeof carregarAnimaisAdmin === 'function') await carregarAnimaisAdmin();
+                    window.location.hash = '#catalogo';
                 };
 
                 if (file) {
@@ -977,18 +965,10 @@
         const showLoginBtn = document.getElementById('show-login');
         const showRegisterBtn = document.getElementById('show-register');
 
-        // Se a página está sendo servida pelo Express (mesma origem), usa location.origin.
-        // Se foi aberta pelo Live Server (porta 5500 / outra) ou como file://,
-        // cai no backend local em http://localhost:3000.
-        const API_BASE = (() => {
-            if (location.protocol === 'file:') return 'http://127.0.0.1:3000';
-            const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
-            if (isLocalhost && location.port !== '3000') {
-                return 'http://localhost:3000';
-            }
-            return location.origin;
-        })();
-        console.log('API_BASE:', API_BASE);
+        // --- Cliente Supabase ---
+        const SUPABASE_URL = 'https://dyzxsfzoysfohmnlyvaa.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5enhzZnpveXNmb2htbmx5dmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MjQ1ODQsImV4cCI6MjA5MjAwMDU4NH0.kNM45STNaGT2KcM39367LCQP6HE2PyA1iyJNPK1ItgI';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const SESSION_KEY = 'reptilia_session';
         const logoutBtn = document.getElementById('logout-btn');
         const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
@@ -1095,6 +1075,7 @@
             });
             if (!confirmed) return;
 
+            await supabase.auth.signOut();
             clearSession();
             applySession();
             Swal.fire({
@@ -1134,6 +1115,7 @@
             });
             if (!confirmed) return;
 
+            await supabase.auth.signOut();
             clearSession();
             applySession();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1176,60 +1158,58 @@
         loginForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            const username = document.getElementById('login-user').value.trim();
+            const email = document.getElementById('login-user').value.trim();
             const password = document.getElementById('login-pass').value;
 
-            try {
-                const response = await fetch(`${API_BASE}/api/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-                if (!response.ok) {
-                    loginError.classList.remove('hidden');
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Falha na autenticação',
-                        text: 'Usuário ou senha incorretos. Tente novamente.',
-                        confirmButtonText: 'Ok',
-                        footer: ''
-                    });
-                    return;
-                }
-
-                const data = await response.json();
-                setSession(data.user);
-                loginError.classList.add('hidden');
-
-                Swal.fire({
-                    icon: 'success',
-                    title: `Bem-vindo, ${data.user.username}!`,
-                    text: data.user.is_admin ? 'Acesso de administrador concedido.' : 'Login realizado com sucesso.',
-                    timer: 1500,
-                    showConfirmButton: false,
-                    willClose: () => {
-                        applySession();
-                        loginForm.reset();
-                    }
-                });
-            } catch (err) {
+            if (error || !data.user) {
+                loginError.classList.remove('hidden');
                 Swal.fire({
                     icon: 'error',
-                    title: 'Servidor indisponível',
-                    text: `Não foi possível contatar ${API_BASE}/api/login. Verifique se o backend está rodando.`
+                    title: 'Falha na autenticação',
+                    text: error?.message || 'Email ou senha incorretos.',
+                    confirmButtonText: 'Ok'
                 });
+                return;
             }
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('username, is_admin')
+                .eq('id', data.user.id)
+                .single();
+
+            const sessionUser = {
+                id: data.user.id,
+                email: data.user.email,
+                username: profile?.username || data.user.email.split('@')[0],
+                is_admin: !!profile?.is_admin
+            };
+            setSession(sessionUser);
+            loginError.classList.add('hidden');
+
+            Swal.fire({
+                icon: 'success',
+                title: `Bem-vindo, ${sessionUser.username}!`,
+                text: sessionUser.is_admin ? 'Acesso de administrador concedido.' : 'Login realizado com sucesso.',
+                timer: 1500,
+                showConfirmButton: false,
+                willClose: () => {
+                    applySession();
+                    loginForm.reset();
+                }
+            });
         });
 
         registerForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            const username = document.getElementById('register-user').value.trim();
+            const email = document.getElementById('register-user').value.trim();
             const password = document.getElementById('register-pass').value;
             const confirmPassword = document.getElementById('register-pass-confirm').value;
 
-            if (!username || !password || !confirmPassword) {
+            if (!email || !password || !confirmPassword) {
                 registerError.textContent = 'Preencha todos os campos.';
                 registerError.classList.remove('hidden');
                 return;
@@ -1241,27 +1221,15 @@
                 return;
             }
 
-            try {
-                const response = await fetch(`${API_BASE}/api/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
+            const username = email.split('@')[0];
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: { data: { username } }
+            });
 
-                if (!response.ok) {
-                    let errMessage = 'Falha no cadastro';
-                    try {
-                        const errorData = await response.json();
-                        errMessage = errorData.message || errMessage;
-                    } catch (_parseError) {
-                        errMessage = `HTTP ${response.status} ${response.statusText}`;
-                    }
-                    throw new Error(errMessage);
-                }
-
-                await response.json();
-            } catch (err) {
-                registerError.textContent = `Erro no servidor: ${err.message}. Verifique se o backend está em execução no endpoint ${API_BASE}/api/register`;
+            if (error) {
+                registerError.textContent = `Erro no cadastro: ${error.message}`;
                 registerError.classList.remove('hidden');
                 return;
             }
@@ -1312,31 +1280,19 @@
             });
             if (!confirmResult.isConfirmed) return;
 
-            try {
-                const response = await fetch(`${API_BASE}/api/animais/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'x-username': session.username }
-                });
-
-                if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.message || `HTTP ${response.status}`);
-                }
-
-                await carregarAnimais();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Animal excluído',
-                    timer: 1200,
-                    showConfirmButton: false
-                });
-            } catch (err) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Falha ao excluir',
-                    text: err.message
-                });
+            const { error } = await supabase.from('animais').delete().eq('id', id);
+            if (error) {
+                Swal.fire({ icon: 'error', title: 'Falha ao excluir', text: error.message });
+                return;
             }
+
+            await carregarAnimais();
+            Swal.fire({
+                icon: 'success',
+                title: 'Animal excluído',
+                timer: 1200,
+                showConfirmButton: false
+            });
         });
 
         // Coloque esta função no início da seção de "Form Submit Simulation"
@@ -1350,35 +1306,35 @@ async function carregarClientes() {
 
     tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">Carregando...</td></tr>`;
 
-    try {
-        const response = await fetch(`${API_BASE}/api/users`, {
-            headers: { 'x-username': session.username }
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const { data: clientes, error } = await supabase
+        .from('profiles')
+        .select('id, username, is_admin')
+        .order('created_at', { ascending: true });
 
-        const clientes = await response.json();
-        countEl.textContent = `${clientes.length} cadastrado(s)`;
-
-        if (clientes.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">Nenhum cliente cadastrado ainda.</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = clientes.map(c => `
-            <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3 font-mono text-xs text-slate-500">#${c.id}</td>
-                <td class="px-4 py-3 font-semibold">${c.username}</td>
-                <td class="px-4 py-3">
-                    ${c.is_admin
-                        ? '<span class="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-brand-DEFAULT/10 text-brand-dark"><i class="fa-solid fa-shield-halved"></i> ADMIN</span>'
-                        : '<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full bg-slate-100 text-slate-600"><i class="fa-solid fa-user"></i> Cliente</span>'}
-                </td>
-            </tr>
-        `).join('');
-    } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-red-500">Falha ao carregar: ${err.message}</td></tr>`;
+    if (error) {
+        tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-red-500">Falha ao carregar: ${error.message}</td></tr>`;
         countEl.textContent = '';
+        return;
     }
+
+    countEl.textContent = `${clientes.length} cadastrado(s)`;
+
+    if (clientes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">Nenhum cliente cadastrado ainda.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = clientes.map(c => `
+        <tr class="hover:bg-slate-50">
+            <td class="px-4 py-3 font-mono text-xs text-slate-500">${String(c.id).slice(0, 8)}…</td>
+            <td class="px-4 py-3 font-semibold">${c.username ?? '—'}</td>
+            <td class="px-4 py-3">
+                ${c.is_admin
+                    ? '<span class="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-brand-DEFAULT/10 text-brand-dark"><i class="fa-solid fa-shield-halved"></i> ADMIN</span>'
+                    : '<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full bg-slate-100 text-slate-600"><i class="fa-solid fa-user"></i> Cliente</span>'}
+            </td>
+        </tr>
+    `).join('');
 }
 
 const refreshClientsBtn = document.getElementById('refresh-clients-btn');
@@ -1387,23 +1343,47 @@ if (refreshClientsBtn) {
 }
 
 async function carregarAnimais() {
-    try {
-        const response = await fetch(`${API_BASE}/api/animais`); // Usa a nova rota GET
-        const animais = await response.json();
-        catalogGrid.innerHTML = ''; // Limpa o grid antes de adicionar
-        animais.forEach(animal => {
-            // Formata o preço para exibição
-            const formattedPrice = parseFloat(animal.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            createCard(animal.id, animal.imgSrc, animal.name, animal.species, animal.category, formattedPrice, animal.desc);
-        });
-    } catch (error) {
+    const { data: animais, error } = await supabase
+        .from('animais')
+        .select('id, name, species, category, diet, price, imageUrl:image_url, desc:description, imgSrc:img_src')
+        .order('id', { ascending: false });
+
+    if (error) {
         console.error('Falha ao carregar o catálogo:', error);
+        return;
     }
+
+    catalogGrid.innerHTML = '';
+    animais.forEach(animal => {
+        const formattedPrice = parseFloat(animal.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        createCard(animal.id, animal.imgSrc, animal.name, animal.species, animal.category, formattedPrice, animal.desc);
+    });
 }
 
-// Chame a função quando a página carregar
-document.addEventListener('DOMContentLoaded', () => {
-    carregarAnimais();
+async function initSession() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        clearSession();
+        applySession();
+        return;
+    }
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('username, is_admin')
+        .eq('id', user.id)
+        .single();
+    setSession({
+        id: user.id,
+        email: user.email,
+        username: profile?.username || user.email.split('@')[0],
+        is_admin: !!profile?.is_admin
+    });
+    applySession();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await initSession();
+    await carregarAnimais();
     const session = getSession();
     if (session && session.is_admin) carregarAnimaisAdmin();
 });
@@ -1422,11 +1402,18 @@ async function carregarAnimaisAdmin() {
     if (!session || !session.is_admin) return;
 
     animalsTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">Carregando...</td></tr>`;
-    try {
-        const response = await fetch(`${API_BASE}/api/animais`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const animais = await response.json();
-        animalsCount.textContent = `${animais.length} animal(is)`;
+    const { data: animais, error } = await supabase
+        .from('animais')
+        .select('id, name, species, category, price, desc:description')
+        .order('id', { ascending: false });
+
+    if (error) {
+        animalsTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-red-500">Falha ao carregar: ${error.message}</td></tr>`;
+        animalsCount.textContent = '';
+        return;
+    }
+
+    animalsCount.textContent = `${animais.length} animal(is)`;
 
         if (animais.length === 0) {
             animalsTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">Nenhum animal cadastrado.</td></tr>`;
@@ -1454,11 +1441,7 @@ async function carregarAnimaisAdmin() {
                     </td>
                 </tr>
             `;
-        }).join('');
-    } catch (err) {
-        animalsTbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-red-500">Falha ao carregar: ${err.message}</td></tr>`;
-        animalsCount.textContent = '';
-    }
+    }).join('');
 }
 
 if (refreshAnimalsBtn) refreshAnimalsBtn.addEventListener('click', carregarAnimaisAdmin);
@@ -1490,15 +1473,16 @@ animalsTbody.addEventListener('click', async (event) => {
     const editBtn = event.target.closest('[data-edit-animal]');
     if (editBtn) {
         const id = editBtn.getAttribute('data-edit-animal');
-        try {
-            const response = await fetch(`${API_BASE}/api/animais`);
-            const animais = await response.json();
-            const animal = animais.find(a => String(a.id) === String(id));
-            if (!animal) throw new Error('Animal não encontrado.');
-            openEditAnimal(animal);
-        } catch (err) {
-            Swal.fire({ icon: 'error', title: 'Falha ao abrir edição', text: err.message });
+        const { data: animal, error } = await supabase
+            .from('animais')
+            .select('id, name, species, category, price, desc:description')
+            .eq('id', id)
+            .single();
+        if (error || !animal) {
+            Swal.fire({ icon: 'error', title: 'Falha ao abrir edição', text: error?.message || 'Animal não encontrado.' });
+            return;
         }
+        openEditAnimal(animal);
         return;
     }
 
@@ -1519,21 +1503,14 @@ animalsTbody.addEventListener('click', async (event) => {
         });
         if (!confirmResult.isConfirmed) return;
 
-        try {
-            const response = await fetch(`${API_BASE}/api/animais/${id}`, {
-                method: 'DELETE',
-                headers: { 'x-username': session.username }
-            });
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.message || `HTTP ${response.status}`);
-            }
-            await carregarAnimaisAdmin();
-            await carregarAnimais();
-            Swal.fire({ icon: 'success', title: 'Animal excluído', timer: 1200, showConfirmButton: false });
-        } catch (err) {
-            Swal.fire({ icon: 'error', title: 'Falha ao excluir', text: err.message });
+        const { error } = await supabase.from('animais').delete().eq('id', id);
+        if (error) {
+            Swal.fire({ icon: 'error', title: 'Falha ao excluir', text: error.message });
+            return;
         }
+        await carregarAnimaisAdmin();
+        await carregarAnimais();
+        Swal.fire({ icon: 'success', title: 'Animal excluído', timer: 1200, showConfirmButton: false });
     }
 });
 
@@ -1548,29 +1525,19 @@ editAnimalForm.addEventListener('submit', async (event) => {
         species: document.getElementById('edit-animal-species').value.trim(),
         category: document.getElementById('edit-animal-category').value,
         price: parseFloat(document.getElementById('edit-animal-price').value) || null,
-        desc: document.getElementById('edit-animal-desc').value.trim()
+        description: document.getElementById('edit-animal-desc').value.trim()
     };
 
-    try {
-        const response = await fetch(`${API_BASE}/api/animais/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-username': session.username
-            },
-            body: JSON.stringify(payload)
-        });
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.message || `HTTP ${response.status}`);
-        }
-        closeEditAnimal();
-        await carregarAnimaisAdmin();
-        await carregarAnimais();
-        Swal.fire({ icon: 'success', title: 'Animal atualizado', timer: 1200, showConfirmButton: false });
-    } catch (err) {
-        Swal.fire({ icon: 'error', title: 'Falha ao atualizar', text: err.message });
+    const { error } = await supabase.from('animais').update(payload).eq('id', id);
+    if (error) {
+        Swal.fire({ icon: 'error', title: 'Falha ao atualizar', text: error.message });
+        return;
     }
+
+    closeEditAnimal();
+    await carregarAnimaisAdmin();
+    await carregarAnimais();
+    Swal.fire({ icon: 'success', title: 'Animal atualizado', timer: 1200, showConfirmButton: false });
 });
 
 
