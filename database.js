@@ -1,15 +1,13 @@
-// Conexão Postgres (Render-compatible)
 const { Pool } = require('pg');
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
     console.error('ERRO: variável DATABASE_URL não definida.');
-    console.error('Crie um arquivo .env com: DATABASE_URL=postgres://user:pass@host:5432/dbname');
+    console.error('Crie um arquivo .env com a URL do Supabase:');
+    console.error('DATABASE_URL=postgresql://postgres:[SENHA]@db.[REF].supabase.co:5432/postgres');
     process.exit(1);
 }
 
-// Render Postgres exige SSL nas conexões externas.
-// Conexões locais (localhost/127.0.0.1) ficam sem SSL.
 const useSsl = !/localhost|127\.0\.0\.1/.test(connectionString);
 
 const pool = new Pool({
