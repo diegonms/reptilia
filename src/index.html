@@ -32,6 +32,16 @@
         }
     </script>
     <style>
+        @font-face {
+            font-family: 'De Valencia';
+            src: url('fonts/De Valencia (beta).otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        .font-valencia {
+            font-family: 'De Valencia', serif;
+        }
         /* Glassmorphism utility classes */
         .glass {
             background: rgba(255, 255, 255, 0.65);
@@ -122,7 +132,7 @@
             <div class="flex justify-between items-center h-20">
                 <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="window.scrollTo(0,0)">
                     <img src="images/logo_rep.png" alt="Logo Reptilia" class="w-8 h-8 mr-2" />
-                    <span class="font-heading font-bold text-2xl text-brand-dark tracking-tight">Reptilia</span>
+                    <span class="font-valencia font-bold text-2xl text-brand-dark tracking-tight">Reptilia</span>
                 </div>
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="#sobre" data-user-only class="text-slate-600 hover:text-brand-DEFAULT font-medium transition">Sobre</a>
@@ -167,7 +177,7 @@
                 A Natureza Exótica <br> <span class=" bg-clip-text bg-gradient-to-r from-brand-DEFAULT to-brand-blue">Na Sua Casa</span>
             </h1>
             <p class="mt-4 text-xl text-slate-600 max-w-2xl mx-auto mb-10">
-                Especialistas em cobras, tartarugas e araras. Animais criados com excelência, ética e documentação rigorosa para quem busca companheiros únicos.
+                Especialistas em animais silvestres legalizados, unindo conservação, responsabilidade e bem-estar animal. Espécies autorizadas, procedência regular e compromisso com a natureza.
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
                 <a href="#catalogo" class="px-8 py-4 bg-emerald-700 text-white rounded-full font-medium hover:bg-emerald-600 transition-all duration-300 shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-1">Ver Catálogo</a>
@@ -205,27 +215,14 @@
                 </div>
                 <div class="lg:w-1/2">
                     <h4 class="text-brand-blue font-semibold tracking-wider uppercase mb-2">Sobre Nós</h4>
-                    <h2 class="font-heading text-4xl font-bold text-brand-dark mb-6">Paixão pelo exótico, respeito pela vida.</h2>
+                    <h2 class="font-heading text-4xl font-bold text-brand-dark mb-6">Paixão pelos animais, respeito pela vida.</h2>
                     <p class="text-slate-600 mb-6 text-lg leading-relaxed">
-                        A Reptilia nasceu da paixão profunda por animais singulares. Com mais de uma década de experiência, nos tornamos referência na criação e comercialização ética de répteis e aves exóticas no Brasil.
+                        A Reptilia nasceu da união entre paixão pela fauna, experiência e compromisso com a conservação ambiental. Há mais de uma década, atuamos na criação e comercialização legalizada de répteis e aves exóticas, sempre com foco em ética, bem-estar animal e procedência responsável.
                     </p>
                     <p class="text-slate-600 mb-8 text-lg leading-relaxed">
-                        Nosso compromisso vai além da venda. Garantimos que cada animal que sai de nossas instalações está em perfeitas condições de saúde e que seus novos tutores possuam todo o conhecimento e suporte necessários para proporcionar uma vida longa e feliz.
+                        Nosso compromisso vai além da criação. Garantimos animais saudáveis, manejo especializado e suporte completo para que cada tutor ofereça uma vida segura e de qualidade ao seu animal.
                     </p>
-                    <ul class="space-y-4">
-                        <li class="flex items-center text-slate-700 font-medium">
-                            <i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i>
-                            <button class="text-left w-full underline-offset-4 hover:underline focus:outline-none" data-diff="ibama">Manejo Ético e Bem-Estar</button>
-                        </li>
-                        <li class="flex items-center text-slate-700 font-medium">
-                            <i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i>
-                            <button class="text-left w-full underline-offset-4 hover:underline focus:outline-none" data-diff="microchip">Controle Genético</button>
-                        </li>
-                        <li class="flex items-center text-slate-700 font-medium">
-                            <i class="fa-solid fa-check-circle text-brand-DEFAULT mr-3"></i>
-                            <button class="text-left w-full underline-offset-4 hover:underline focus:outline-none" data-diff="vet">Biossegurança</button>
-                        </li>
-                    </ul>
+
                 </div>
             </div>
         </div>
@@ -240,65 +237,6 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="catalog-grid">
-                <!-- Card Cobra -->
-                <div class="glass rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col">
-                    <div class="relative h-64 overflow-hidden">
-                        <div class="absolute inset-0 bg-brand-dark/20 group-hover:bg-transparent transition-all z-10"></div>
-                        <img src="https://images.unsplash.com/photo-1531386151447-fd76ad50012f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cobra Python" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
-                        <span class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">Répteis</span>
-                    </div>
-                    <div class="p-6 flex-grow flex flex-col">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-heading text-2xl font-bold text-brand-dark">Python Regius</h3>
-                                <p class="text-slate-500 text-sm italic">Píton-real (Morph Pastel)</p>
-                            </div>
-                            <span class="font-bold text-brand-DEFAULT text-xl">R$ 1.800</span>
-                        </div>
-                        <p class="text-slate-600 text-sm mb-6 flex-grow">Cobras extremamente dóceis, ideais para iniciantes. Cores vibrantes e excelente estado de saúde. Alimentando-se perfeitamente.</p>
-                        <button data-require-login class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
-                    </div>
-                </div>
-
-                <!-- Card Tartaruga -->
-                <div class="glass rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col">
-                    <div class="relative h-64 overflow-hidden">
-                        <div class="absolute inset-0 bg-brand-dark/20 group-hover:bg-transparent transition-all z-10"></div>
-                        <img src="https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Tartaruga" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
-                        <span class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">Quelônios</span>
-                    </div>
-                    <div class="p-6 flex-grow flex flex-col">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-heading text-2xl font-bold text-brand-dark">Jabuti-Piranga</h3>
-                                <p class="text-slate-500 text-sm italic">Chelonoidis carbonarius</p>
-                            </div>
-                            <span class="font-bold text-brand-DEFAULT text-xl">R$ 950</span>
-                        </div>
-                        <p class="text-slate-600 text-sm mb-6 flex-grow">Filhotes nascidos em cativeiro com carapaças perfeitas. Extremamente interativos e adaptáveis ao clima tropical brasileiro.</p>
-                        <button data-require-login class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
-                    </div>
-                </div>
-
-                <!-- Card Arara -->
-                <div class="glass rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col">
-                    <div class="relative h-64 overflow-hidden">
-                        <div class="absolute inset-0 bg-brand-dark/20 group-hover:bg-transparent transition-all z-10"></div>
-                        <img src="images/Arara_Caninde.jpg" alt="Arara Canindé" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
-                        <span class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">Aves</span>
-                    </div>
-                    <div class="p-6 flex-grow flex flex-col">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-heading text-2xl font-bold text-brand-dark">Arara Canindé</h3>
-                                <p class="text-slate-500 text-sm italic">Ara ararauna</p>
-                            </div>
-                            <span class="font-bold text-brand-DEFAULT text-xl">R$ 18.500</span>
-                        </div>
-                        <p class="text-slate-600 text-sm mb-6 flex-grow">Aves mansas criadas na mão (hand-fed). Plumagem impecável, anilhadas e sexadas por DNA. Companheiras para a vida toda.</p>
-                        <button data-require-login class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -343,15 +281,6 @@
             </div>
         </div>
     </section>
-
-    <!-- Modal Diferenciais -->
-    <div id="diff-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" aria-hidden="true">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative">
-            <button id="diff-modal-close" class="absolute top-4 right-4 text-slate-500 hover:text-slate-900" aria-label="Fechar modal">✕</button>
-            <h3 id="diff-modal-title" class="text-2xl font-heading font-bold text-brand-dark mb-3">Título</h3>
-            <p id="diff-modal-content" class="text-slate-700 leading-relaxed">Descrição detalhada do diferencial.</p>
-        </div>
-    </div>
 
     <!-- Depoimentos -->
     <section data-user-only class="py-24 relative overflow-hidden">
@@ -843,49 +772,6 @@
             });
 
 
-        // Diferenciais Modal (linhas do Sobre Nós)
-        const diffData = {
-            ibama: {
-                title: 'Manejo Ético e Bem-Estar',
-                text: 'A etologia é o estudo do comportamento, sendo aplicado em cada indivíduo e cada espécie. Isso significa que o recinto é um ambiente que atende às necessidades fisiológicas e psicológicas do animal. "Nem sempre o que é bom para os nossos olhos é bom para o animal, a etologia confirma isso".'
-            },
-            microchip: {
-                title: 'Controle Genético',
-                text: 'Um mapeamento cuidadoso, e projetos pensados evita anomalias e garante um plantel robusto e saudável.'
-            },
-            vet: {
-                title: 'Biossegurança',
-                text: 'O olhar treinado identifica vetores de doenças e riscos de contaminação antes que se tornem um problema, reduzindo drasticamente a mortalidade.'
-            }
-        };
-
-        const modal = document.getElementById('diff-modal');
-        const modalTitle = document.getElementById('diff-modal-title');
-        const modalContent = document.getElementById('diff-modal-content');
-        const modalClose = document.getElementById('diff-modal-close');
-
-        document.querySelectorAll('[data-diff]').forEach(button => {
-            button.addEventListener('click', () => {
-                const key = button.getAttribute('data-diff');
-                const item = diffData[key];
-                if (!item) return;
-                modalTitle.textContent = item.title;
-                modalContent.textContent = item.text;
-                modal.classList.remove('hidden');
-                modal.setAttribute('aria-hidden', 'false');
-            });
-        });
-
-        function closeDiffModal() {
-            modal.classList.add('hidden');
-            modal.setAttribute('aria-hidden', 'true');
-        }
-
-        modalClose.addEventListener('click', closeDiffModal);
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) closeDiffModal();
-        });
-
         // Login / Cadastro com SweetAlert2
         const loginOverlay = document.getElementById('login-overlay');
         const loginForm = document.getElementById('login-form');
@@ -1178,12 +1064,6 @@
                     showTab('login');
                 }
             });
-        });
-
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
-                closeDiffModal();
-            }
         });
 
         // Clique no botão de excluir (apenas admin vê, mas valida mesmo assim)
