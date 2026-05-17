@@ -42,6 +42,12 @@
         .font-valencia {
             font-family: 'De Valencia', serif;
         }
+        /* Evita flash do modal de login/galeria antes do Tailwind (CDN) carregar */
+        #login-overlay.hidden,
+        #edit-animal-modal.hidden,
+        #lightbox.hidden {
+            display: none !important;
+        }
         /* Lightbox da galeria */
         #lightbox {
             opacity: 0;
@@ -213,7 +219,7 @@
             <div class="flex flex-col lg:flex-row items-center gap-12">
                 <div class="lg:w-1/2 relative group">
                     <div class="absolute -inset-2 bg-gradient-to-r from-brand-DEFAULT to-brand-blue rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                    <img src="images/Arara_Caninde.jpg" alt="Arara Azul Exótica" class="relative rounded-2xl shadow-2xl object-cover h-[500px] w-full transition-transform duration-500 group-hover:scale-[1.02]">
+                    <img src="images/jiboia.jpeg" alt="Jiboia" class="relative rounded-2xl shadow-2xl object-cover h-[500px] w-full transition-transform duration-500 group-hover:scale-[1.02]">
                 </div>
                 <div class="lg:w-1/2">
                     <h4 class="text-brand-blue font-semibold tracking-wider uppercase mb-2">Sobre Nós</h4>
@@ -762,6 +768,10 @@
                 ? `<span class="absolute bottom-4 right-4 z-20 bg-black/60 text-white text-xs font-semibold px-2.5 py-1 rounded-full"><i class="fa-solid fa-images mr-1"></i>${fotos.length}</span>`
                 : '';
 
+            const waNumero = '5543999902814';
+            const waMsg = encodeURIComponent(`Olá! Tenho interesse em reservar o animal: ${String(name).toUpperCase()}`);
+            const waLink = `https://wa.me/${waNumero}?text=${waMsg}`;
+
             newCard.innerHTML = `
                 <div class="relative h-64 overflow-hidden">
                     <div class="absolute inset-0 bg-brand-dark/20 group-hover:bg-transparent transition-all z-10 pointer-events-none"></div>
@@ -779,7 +789,7 @@
                         <span class="font-bold text-brand-DEFAULT text-xl">R$ ${price}</span>
                     </div>
                     <p class="text-slate-600 text-sm mb-6 flex-grow">${desc}</p>
-                    <button data-require-login class="w-full py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors">Reservar Animal</button>
+                    <a href="${waLink}" target="_blank" rel="noopener" class="w-full text-center inline-flex items-center justify-center gap-2 py-3 border-2 border-brand-DEFAULT text-brand-DEFAULT rounded-xl font-medium hover:bg-brand-DEFAULT hover:text-white transition-colors"><i class="fa-brands fa-whatsapp"></i> Reservar Animal</a>
                 </div>
             `;
 
