@@ -13,8 +13,12 @@ CREATE TABLE IF NOT EXISTS public.animais (
   image_url   TEXT,
   price       NUMERIC,
   description TEXT,
-  img_src     TEXT
+  img_src     TEXT,
+  images      JSONB DEFAULT '[]'::jsonb
 );
+
+-- 1b) Se a tabela ja existia sem a coluna images, adiciona agora
+ALTER TABLE public.animais ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
 
 -- 2) Tabela profiles (1-pra-1 com auth.users)
 CREATE TABLE IF NOT EXISTS public.profiles (
