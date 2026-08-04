@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/diegonms/reptilia/issues"
   },
-  "homepage": "https://github.com/diegonms/reptilia#readme"
+  "homepage": "https://github.com/diegonms/reptilia#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.0"
+  }
 }

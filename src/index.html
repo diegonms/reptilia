@@ -695,17 +695,13 @@
         const previewGrid = document.getElementById('preview-grid');
         const MAX_FOTOS = 8;
 
-        // Lê um File como Data URL (Promise)
-        function readFileAsDataURL(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
+        // Tamanho máximo por arquivo (3 MB)
+        const MAX_FILE_BYTES = 3 * 1024 * 1024;
+        // Bucket público do Supabase Storage onde as fotos ficam hospedadas
+        const STORAGE_BUCKET = 'animais-fotos';
 
-        // Acumula as fotos selecionadas (não substitui a cada seleção)
+        // Acumula as fotos selecionadas. Cada item = { file, previewUrl }.
+        // previewUrl é um object URL usado SÓ para exibição local (nunca vai pro banco).
         let selectedImages = [];
 
         function renderPreview() {
@@ -714,9 +710,9 @@
                 previewGrid.innerHTML = '';
                 return;
             }
-            previewGrid.innerHTML = selectedImages.map((u, i) => `
+            previewGrid.innerHTML = selectedImages.map((item, i) => `
                 <div class="relative group">
-                    <img src="${u}" class="w-full h-20 object-cover rounded-lg border border-slate-200">
+                    <img src="${item.previewUrl}" class="w-full h-20 object-cover rounded-lg border border-slate-200">
                     ${i === 0 ? '<span class="absolute top-1 left-1 bg-brand-DEFAULT text-white text-[10px] font-bold px-1.5 py-0.5 rounded">CAPA</span>' : ''}
                     <button type="button" data-remove-foto="${i}" title="Remover" class="absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded-full bg-red-600 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
                 </div>
@@ -724,7 +720,7 @@
             previewContainer.classList.remove('hidden');
         }
 
-        fileInput.addEventListener('change', async () => {
+        fileInput.addEventListener('change', () => {
             const novos = Array.from(fileInput.files);
             fileInput.value = ''; // limpa pra permitir re-selecionar e acumular
             if (novos.length === 0) return;
@@ -734,13 +730,24 @@
                 alert(`Máximo de ${MAX_FOTOS} fotos atingido.`);
                 return;
             }
-            const aUsar = novos.slice(0, espacoLivre);
-            if (novos.length > espacoLivre) {
+
+            // Valida tamanho de cada arquivo ANTES de aceitar (limite de 3 MB)
+            const grandes = novos.filter(f => f.size > MAX_FILE_BYTES);
+            if (grandes.length) {
+                const nomes = grandes.map(f => `• ${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)`).join('\n');
+                alert(`Cada foto deve ter no máximo 3 MB. Arquivo(s) recusado(s):\n${nomes}`);
+            }
+            const validos = novos.filter(f => f.size <= MAX_FILE_BYTES);
+            if (validos.length === 0) return;
+
+            const aUsar = validos.slice(0, espacoLivre);
+            if (validos.length > espacoLivre) {
                 alert(`Máximo de ${MAX_FOTOS} fotos. Só foram adicionadas ${espacoLivre}.`);
             }
 
-            const urls = await Promise.all(aUsar.map(readFileAsDataURL));
-            selectedImages.push(...urls);
+            aUsar.forEach(file => {
+                selectedImages.push({ file, previewUrl: URL.createObjectURL(file) });
+            });
             renderPreview();
         });
 
@@ -749,7 +756,8 @@
             const btn = e.target.closest('[data-remove-foto]');
             if (!btn) return;
             const idx = parseInt(btn.getAttribute('data-remove-foto'), 10);
-            selectedImages.splice(idx, 1);
+            const [removida] = selectedImages.splice(idx, 1);
+            if (removida) URL.revokeObjectURL(removida.previewUrl); // libera memória do preview
             renderPreview();
         });
 
@@ -804,20 +812,61 @@
             catalogGrid.insertBefore(newCard, catalogGrid.firstChild);
         }
 
-        // Substitua seu 'form.addEventListener' por este aqui
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
+        // Faz upload de cada File para o Supabase Storage e devolve as URLs públicas.
+        // Erros são tratados por arquivo: uma foto que falha não derruba as demais.
+        async function uploadFotos(files) {
+            const tempId = crypto.randomUUID(); // pasta única por cadastro (evita colisões)
+            const urls = [];
+            const falhas = [];
+            for (const file of files) {
+                const safeName = file.name.replace(/[^\w.\-]+/g, '_');
+                const path = `${tempId}/${crypto.randomUUID()}-${safeName}`;
+                const { error: upErr } = await db.storage
+                    .from(STORAGE_BUCKET)
+                    .upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type });
+                if (upErr) {
+                    falhas.push(`${file.name}: ${upErr.message}`);
+                    continue;
+                }
+                const { data: pub } = db.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+                urls.push(pub.publicUrl);
+            }
+            return { urls, falhas };
+        }
 
-                const name = document.getElementById('animal-name').value;
-                const species = document.getElementById('animal-species').value;
-                const category = document.getElementById('animal-category').value;
-                const price = parseFloat(document.getElementById('animal-price').value); // Envie como número
-                const desc = document.getElementById('animal-desc').value;
-                const defaultImage = 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-                const images = selectedImages.length > 0
-                    ? selectedImages.slice(0, MAX_FOTOS)
-                    : [defaultImage];
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const name = document.getElementById('animal-name').value;
+            const species = document.getElementById('animal-species').value;
+            const category = document.getElementById('animal-category').value;
+            const price = parseFloat(document.getElementById('animal-price').value); // Envie como número
+            const desc = document.getElementById('animal-desc').value;
+            const defaultImage = 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+
+            // Bloqueia o botão enquanto as fotos sobem
+            const btnHtmlOriginal = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Enviando fotos...';
+
+            try {
+                let images;
+                if (selectedImages.length > 0) {
+                    const arquivos = selectedImages.slice(0, MAX_FOTOS).map(item => item.file);
+                    const { urls, falhas } = await uploadFotos(arquivos);
+
+                    if (falhas.length) {
+                        alert(`Algumas fotos não foram enviadas:\n${falhas.join('\n')}`);
+                    }
+                    if (urls.length === 0) {
+                        alert('Nenhuma foto pôde ser enviada. O animal NÃO foi cadastrado.');
+                        return;
+                    }
+                    images = urls;
+                } else {
+                    images = [defaultImage];
+                }
 
                 const { error } = await db.from('animais').insert({
                     name,
@@ -826,9 +875,9 @@
                     diet: 'Omnívoro',
                     price,
                     description: desc,
-                    image_url: images[0],
-                    img_src: images[0],
-                    images
+                    image_url: images[0], // agora é uma URL curta, não base64
+                    img_src: images[0],   // redundante com image_url — mantido p/ fallback de carregarAnimais
+                    images                // array de URLs públicas do Storage
                 });
 
                 if (error) {
@@ -837,6 +886,8 @@
                     return;
                 }
 
+                // Libera os object URLs de preview antes de limpar
+                selectedImages.forEach(item => URL.revokeObjectURL(item.previewUrl));
                 form.reset();
                 selectedImages = [];
                 previewContainer.classList.add('hidden');
@@ -847,7 +898,11 @@
                 await carregarAnimais();
                 if (typeof carregarAnimaisAdmin === 'function') await carregarAnimaisAdmin();
                 window.location.hash = '#catalogo';
-            });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = btnHtmlOriginal;
+            }
+        });
 
 
         // Login / Cadastro com SweetAlert2
