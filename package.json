@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/diegonms/reptilia#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.112.0"
+    "@supabase/supabase-js": "^2.112.0",
+    "jimp": "^1.6.0"
   }
 }

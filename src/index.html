@@ -695,8 +695,9 @@
         const previewGrid = document.getElementById('preview-grid');
         const MAX_FOTOS = 8;
 
-        // Tamanho máximo por arquivo (3 MB)
-        const MAX_FILE_BYTES = 3 * 1024 * 1024;
+        // Tamanho máximo por arquivo original (15 MB). As fotos são comprimidas no
+        // navegador antes do upload, então esse limite só barra arquivos absurdos.
+        const MAX_FILE_BYTES = 15 * 1024 * 1024;
         // Bucket público do Supabase Storage onde as fotos ficam hospedadas
         const STORAGE_BUCKET = 'animais-fotos';
 
@@ -735,7 +736,7 @@
             const grandes = novos.filter(f => f.size > MAX_FILE_BYTES);
             if (grandes.length) {
                 const nomes = grandes.map(f => `• ${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)`).join('\n');
-                alert(`Cada foto deve ter no máximo 3 MB. Arquivo(s) recusado(s):\n${nomes}`);
+                alert(`Cada foto deve ter no máximo 15 MB. Arquivo(s) recusado(s):\n${nomes}`);
             }
             const validos = novos.filter(f => f.size <= MAX_FILE_BYTES);
             if (validos.length === 0) return;
@@ -812,13 +813,41 @@
             catalogGrid.insertBefore(newCard, catalogGrid.firstChild);
         }
 
+        // Redimensiona (máx. 1600px) e recomprime a imagem como JPEG no próprio
+        // navegador, para as fotos subirem leves (~300 KB) e carregarem rápido.
+        async function comprimirImagem(file, maxLado = 1600, quality = 0.8) {
+            if (!file.type.startsWith('image/')) return file;
+            let bitmap;
+            try {
+                bitmap = await createImageBitmap(file);
+            } catch (_e) {
+                return file; // formato não suportado -> sobe original
+            }
+            let { width, height } = bitmap;
+            if (width > maxLado || height > maxLado) {
+                const escala = Math.min(maxLado / width, maxLado / height);
+                width = Math.round(width * escala);
+                height = Math.round(height * escala);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
+            bitmap.close?.();
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+            if (!blob || blob.size >= file.size) return file; // não ficou menor -> mantém original
+            const nome = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+            return new File([blob], nome, { type: 'image/jpeg' });
+        }
+
         // Faz upload de cada File para o Supabase Storage e devolve as URLs públicas.
         // Erros são tratados por arquivo: uma foto que falha não derruba as demais.
         async function uploadFotos(files) {
             const tempId = crypto.randomUUID(); // pasta única por cadastro (evita colisões)
             const urls = [];
             const falhas = [];
-            for (const file of files) {
+            for (const original of files) {
+                const file = await comprimirImagem(original);
                 const safeName = file.name.replace(/[^\w.\-]+/g, '_');
                 const path = `${tempId}/${crypto.randomUUID()}-${safeName}`;
                 const { error: upErr } = await db.storage
@@ -875,8 +904,7 @@
                     diet: 'Omnívoro',
                     price,
                     description: desc,
-                    image_url: images[0], // agora é uma URL curta, não base64
-                    img_src: images[0],   // redundante com image_url — mantido p/ fallback de carregarAnimais
+                    image_url: images[0], // capa (URL curta do Storage)
                     images                // array de URLs públicas do Storage
                 });
 
@@ -1213,11 +1241,9 @@
 
         function renderLightbox() {
             const multi = lbImages.length > 1;
-            lightboxImg.classList.add('lb-fading');
-            setTimeout(() => {
-                lightboxImg.src = lbImages[lbIndex];
-                lightboxImg.classList.remove('lb-fading');
-            }, 120);
+            // Troca imediata — as fotos já foram pré-carregadas em openLightbox,
+            // então trocar a src mostra a imagem na hora (vem do cache do navegador).
+            lightboxImg.src = lbImages[lbIndex];
             lightboxCounter.textContent = `${lbIndex + 1} / ${lbImages.length}`;
             lightboxPrev.classList.toggle('hidden', !multi);
             lightboxNext.classList.toggle('hidden', !multi);
@@ -1366,13 +1392,35 @@ async function carregarAnimais() {
     }
 
     catalogGrid.innerHTML = '';
+    const todasFotos = [];
     animais.forEach(animal => {
         const formattedPrice = parseFloat(animal.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         const fotos = (Array.isArray(animal.images) && animal.images.length)
             ? animal.images
             : (animal.imgSrc ? [animal.imgSrc] : []);
+        todasFotos.push(...fotos);
         createCard(animal.id, fotos, animal.name, animal.species, animal.category, formattedPrice, animal.desc);
     });
+
+    // Pré-carrega TODAS as fotos das galerias em segundo plano (prioridade baixa),
+    // sem competir com a renderização inicial. Como o catálogo é leve, ao abrir
+    // qualquer animal as fotos já estão no cache — carrossel instantâneo já na 1ª volta.
+    precarregarFotos(todasFotos);
+}
+
+// Guarda os objetos Image vivos para o navegador não descartar o preload cedo demais.
+const _fotosPrecarregadas = [];
+function precarregarFotos(urls) {
+    const unicas = [...new Set(urls)].filter(u => !_fotosPrecarregadas.some(im => im.src === u));
+    const carregar = () => unicas.forEach(u => {
+        const im = new Image();
+        im.decoding = 'async';
+        try { im.fetchPriority = 'low'; } catch (_e) {}
+        im.src = u;
+        _fotosPrecarregadas.push(im);
+    });
+    if ('requestIdleCallback' in window) requestIdleCallback(carregar, { timeout: 2000 });
+    else setTimeout(carregar, 300);
 }
 
 async function initSession() {
