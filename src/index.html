@@ -1334,52 +1334,6 @@
         });
 
         // Coloque esta função no início da seção de "Form Submit Simulation"
-async function carregarClientes() {
-    const tbody = document.getElementById('clients-tbody');
-    const countEl = document.getElementById('clients-count');
-    if (!tbody) return;
-
-    const session = getSession();
-    if (!session || !session.is_admin) return;
-
-    tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">Carregando...</td></tr>`;
-
-    const { data: clientes, error } = await db
-        .from('profiles')
-        .select('id, username, is_admin')
-        .order('created_at', { ascending: true });
-
-    if (error) {
-        tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-red-500">Falha ao carregar: ${error.message}</td></tr>`;
-        countEl.textContent = '';
-        return;
-    }
-
-    countEl.textContent = `${clientes.length} cadastrado(s)`;
-
-    if (clientes.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">Nenhum cliente cadastrado ainda.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = clientes.map(c => `
-        <tr class="hover:bg-slate-50">
-            <td class="px-4 py-3 font-mono text-xs text-slate-500">${String(c.id).slice(0, 8)}…</td>
-            <td class="px-4 py-3 font-semibold">${c.username ?? '—'}</td>
-            <td class="px-4 py-3">
-                ${c.is_admin
-                    ? '<span class="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-brand-DEFAULT/10 text-brand-dark"><i class="fa-solid fa-shield-halved"></i> ADMIN</span>'
-                    : '<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full bg-slate-100 text-slate-600"><i class="fa-solid fa-user"></i> Cliente</span>'}
-            </td>
-        </tr>
-    `).join('');
-}
-
-const refreshClientsBtn = document.getElementById('refresh-clients-btn');
-if (refreshClientsBtn) {
-    refreshClientsBtn.addEventListener('click', carregarClientes);
-}
-
 async function carregarAnimais() {
     const { data: animais, error } = await db
         .from('animais')
@@ -1392,6 +1346,26 @@ async function carregarAnimais() {
     }
 
     catalogGrid.innerHTML = '';
+
+    if (!animais || animais.length === 0) {
+        catalogGrid.innerHTML = `
+            <div class="col-span-full">
+                <div class="max-w-2xl mx-auto text-center">
+                    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <i class="fa-brands fa-instagram text-3xl text-emerald-600"></i>
+                    </div>
+                    <h3 class="font-heading text-2xl font-bold text-brand-dark mb-4">Nosso catálogo está vazio no momento!</h3>
+                    <p class="text-slate-600 mb-6">Nos siga no Instagram para ficar por dentro das novidades.</p>
+                    <a href="https://instagram.com" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-emerald-600 text-white font-semibold transition-colors hover:bg-emerald-200 hover:text-emerald-600 border border-emerald-600">
+                        <i class="fa-brands fa-instagram"></i>
+                        @reptilia_pets
+                    </a>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
     const todasFotos = [];
     animais.forEach(animal => {
         const formattedPrice = parseFloat(animal.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
